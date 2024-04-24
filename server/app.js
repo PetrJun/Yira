@@ -4,6 +4,7 @@ const app = express();
 const port = 8000;
 
 const taskController = require("./src/controller/task");
+const userController = require("./src/controller/user");
 
 app.use(express.json()); // podpora pro application/json
 app.use(express.urlencoded({ extended: true })); // podpora pro application/x-www-form-urlencoded
@@ -16,6 +17,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/task", taskController);
+app.use("/user", userController);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
-const taskFolderPath = path.join(__dirname, "storage", "tasksList");
+const taskFolderPath = path.join(__dirname, "storage", "taskList");
 
 // Method to read a task from a file
 function get(taskId) {

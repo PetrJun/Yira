@@ -2,6 +2,7 @@ const Ajv = require("ajv");
 const ajv = new Ajv();
 
 const taskDAO = require("../../DAO/taskDAO.js");
+const userDao = require("../../DAO/userDAO.js");
 const { State } = require("../../hellpers/enumState.js");
 const { validateDateTime } = require("../../hellpers/validateDatetime.js");
 const addFieldsToCreateTask = require("../../hellpers/taskFunctions.js");
@@ -12,16 +13,16 @@ ajv.addFormat("date-time", { validate: validateDateTime });
 const schema = {
     type: "object",
     properties: {
-        projectId: { type: "string" },
+        projectId: { type: "string", minLength: 32, maxLength: 32 },
         name: { type: "string" },
-        createdBy: { type: "string" },
-        assigneeUser: { type: "string" },
+        createdBy: { type: "string", minLength: 32, maxLength: 32 },
+        assigneeUser: { type: "string", minLength: 32, maxLength: 32 },
         state: { type: "string", enum: Object.values(State) },
         deadline: { type: "string", format: "date-time" },
         estimate: { type: "number" },
         worked: { type: "number", default: 0 },
         description: { type: "string", maxLength: 500 },
-        userList: {type: "array", items: { type: "string" } }
+        // userList: {type: "array", items: { type: "string", minLength: 32, maxLength: 32 } }
     },
     required: ["projectId", "name", "createdBy", "estimate", "description", "userList"],
     additionalProperties: false,
@@ -30,6 +31,7 @@ const schema = {
 async function CreateAbl(req, res) {
     try {
         let task = req.body;
+        let createdByName, assignedUserName;
         
         // validate input
         const valid = ajv.validate(schema, task);
@@ -48,13 +50,22 @@ async function CreateAbl(req, res) {
 
         task = taskDAO.create(task);
 
-        let sendReq = {
-            recipient: "Adam",
-            sender: "Krystof",
-            taskId: 123
+        if(task.createdBy === task.assigneeUser) {
+            res.json(task);
         }
 
-        sendMail(sendReq, "createTaskNotfication")
+        createdByName = userDao.get(task.createdBy).name;
+        assignedUserName = userDao.get(task.assigneeUser).name;
+        assignedUserEmail = userDao.get(task.assigneeUser).email;
+
+        let sendReq = {
+            sender: createdByName,
+            recipient: assignedUserName,
+            recipientMail: assignedUserEmail,
+            taskId: task.id
+        }
+
+        sendMail(sendReq, "createTaskNotfication");
 
         res.json(task);
     } catch (e) {

@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Created Task</title>
+  <title>Deleted Task</title>
   <style>
     body {
       margin: 0;
@@ -74,10 +74,8 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Ahoj {{recipient}}, {{sender}} ti poslal nový task!</h1>
+      <h1>Ahoj {{recipient}}, {{sender}} smazal task {{taskName}} na kterem jsi byl prirazen!</h1>
     </div>
-    <p>Níže v odkazu se můžeš podívat na task, který ti byl přiřazen.</p>
-    <a href="http://localhost:8000/task/get/{{taskId}}" class="button">Podívat se na task</a>
     <div class="footer">
       Team Yira
     </div>
