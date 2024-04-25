@@ -14,8 +14,7 @@ function addFieldsToCreateTask(req) {
         "deadline": req.deadline,
         "estimate": req.estimate,
         "worked": req.worked,
-        "description": req.description,
-        "userList": req.userList
+        "description": req.description
     }
 }
 

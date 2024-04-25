@@ -18,6 +18,14 @@ const updateTaskNameNotfication = path.join(
     __dirname,
     "../templates/updateTaskNameNotfication.html"
 );
+const createProjectToAssignedUserNotfication = path.join(
+    __dirname,
+    "../templates/createProjectToAssignedUserNotfication.html"
+);
+const deletedProjectNotification = path.join(
+    __dirname,
+    "../templates/deletedProjectNotification.html"
+);
 // more templates
 
 const transporter = nodemailer.createTransport({
@@ -38,7 +46,11 @@ function sendMail(sendReq, template) {
             return;
         }
 
-        let mailOptions = createDataForMailDistribution(sendReq, data);
+        let mailOptions = createDataForMailDistribution(
+            sendReq,
+            template,
+            data
+        );
 
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
@@ -67,18 +79,26 @@ function createEmailTemplate(template) {
         case "updateTaskNameNotfication":
             emailTemplate = updateTaskNameNotfication;
             break;
+        case "createProjectToAssignedUserNotfication":
+            emailTemplate = createProjectToAssignedUserNotfication;
+            break;
+        case "deletedProjectNotification":
+            emailTemplate = deletedProjectNotification;
+            break;
     }
 
     return emailTemplate;
 }
 
-function createDataForMailDistribution(sendReq, template) {
+function createDataForMailDistribution(sendReq, template, data) {
     const sender = sendReq.sender;
     const recipient = sendReq.recipient;
     const recipientMail = sendReq.recipientMail;
     const taskId = sendReq.taskId;
     const taskName = sendReq.taskName;
     const taskNameNew = sendReq.taskNameNew;
+    const projectId = sendReq.projectId;
+    const projectName = sendReq.projectName;
 
     let htmlTemplate, subject;
 
@@ -108,6 +128,18 @@ function createDataForMailDistribution(sendReq, template) {
             .replace("{{taskNameNew}}", taskNameNew)
             .replace("{{taskId}}", taskId);
         subject = "Aktualizovan nazev tasku";
+    } else if (template == "createProjectToAssignedUserNotfication") {
+        htmlTemplate = data
+            .replace("{{recipient}}", recipient)
+            .replace("{{sender}}", sender)
+            .replace("{{projectId}}", projectId);
+        subject = "Novy projekt u ktereho jsi prirazen";
+    } else if (template == "deletedProjectNotification") {
+        htmlTemplate = data
+            .replace("{{recipient}}", recipient)
+            .replace("{{sender}}", sender)
+            .replace("{{projectName}}", projectName);
+        subject = "Smazan projekt na kterem jsi byl prirazen";
     }
 
     return {

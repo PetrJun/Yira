@@ -8,7 +8,7 @@ const UpdateAbl = require("../abl/task/updateAbl");
 
 router.post("/create", CreateAbl);
 router.delete("/delete/:id", DeleteAbl);
-router.get("/get/:id", GetAbl)
-router.put("/update/:id", UpdateAbl)
+router.get("/get/:id", GetAbl);
+router.put("/update/:id", UpdateAbl);
 
 module.exports = router;

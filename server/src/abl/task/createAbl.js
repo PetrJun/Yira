@@ -22,9 +22,16 @@ const schema = {
         estimate: { type: "number" },
         worked: { type: "number", default: 0 },
         description: { type: "string", maxLength: 500 },
-        // userList: {type: "array", items: { type: "string", minLength: 32, maxLength: 32 } }
     },
-    required: ["projectId", "name", "createdBy", "estimate", "description", "userList"],
+    required: [
+        "projectId",
+        "name",
+        "deadline",
+        "createdBy",
+        "estimate",
+        "description",
+        "userList",
+    ],
     additionalProperties: false,
 };
 
@@ -32,7 +39,7 @@ async function CreateAbl(req, res) {
     try {
         let task = req.body;
         let createdByName, assignedUserName;
-        
+
         // validate input
         const valid = ajv.validate(schema, task);
         if (!valid) {
@@ -43,14 +50,14 @@ async function CreateAbl(req, res) {
             });
             return;
         }
-        
-        task = addFieldsToCreateTask(req.body)
+
+        task = addFieldsToCreateTask(req.body);
 
         task.createdAt = new Date().toISOString();
 
         task = taskDAO.create(task);
 
-        if(task.createdBy === task.assigneeUser) {
+        if (task.createdBy === task.assigneeUser) {
             res.json(task);
         }
 
@@ -62,8 +69,8 @@ async function CreateAbl(req, res) {
             sender: createdByName,
             recipient: assignedUserName,
             recipientMail: assignedUserEmail,
-            taskId: task.id
-        }
+            taskId: task.id,
+        };
 
         sendMail(sendReq, "createTaskNotfication");
 
