@@ -48,20 +48,18 @@ async function UpdateAbl(req, res) {
         project.id = projectId;
         oldProject = projectDAO.get(project.id);
 
-        console.log(oldProject.createdBy, userId)
-
         if(oldProject.createdBy !== userId) {
             res.status(400).json({ message: `User: ${userId} can't delete project` });
             return;
         }
 
         if(project.userList){
-            const existingUsers = existingUsersInProject(project.userList);
+            const notExistingUsers = existingUsersInProject(project.userList);
 
-            if (!existingUsers) {
+            if (notExistingUsers > 0) {
                 res.status(404).json({
                     code: "usersNotFound",
-                    message: `User(s) ${notInUsers} not found`,
+                    message: `User(s) ${notExistingUsers} not found`,
                 });
                 return;
             }

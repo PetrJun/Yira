@@ -57,12 +57,12 @@ async function CreateAbl(req, res) {
 
         project.createdAt = new Date().toISOString();
 
-        const existingUsers = existingUsersInProject(project.userList);
+        const notExistingUsers = existingUsersInProject(project.userList);
 
-        if (!existingUsers) {
+        if (notExistingUsers > 0) {
             res.status(404).json({
                 code: "usersNotFound",
-                message: `User(s) ${notInUsers} not found`,
+                message: `User(s) ${notExistingUsers} not found`,
             });
             return;
         }

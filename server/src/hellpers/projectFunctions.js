@@ -23,13 +23,7 @@ function existingUsersInProject(list) {
     const users = userDAO.list();
     const userIds = users.map((user) => user.id);
 
-    const notInUsers = list.filter((value) => !userIds.includes(value));
-
-    if (notInUsers > 0) {
-        return false;
-    } else {
-        return true;
-    }
+    return list.filter((value) => !userIds.includes(value));
 }
 
 
