@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Created Task</title>
+  <title>Update Project</title>
   <style>
     body {
       margin: 0;
@@ -74,10 +74,10 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Ahoj {{recipient}}, {{sender}} ti poslal nový task!</h1>
+      <h1>Ahoj {{recipient}}, byl aktualizovan projekt {{projectName}}, na kterem jsi prirazen!</h1>
     </div>
-    <p>Níže v odkazu se můžeš podívat na task, který ti byl přiřazen.</p>
-    <a href="http://localhost:8000/api/task/get/{{taskId}}" class="button">Podívat se na task</a>
+    <p>Níže v odkazu se můžeš podívat na projekt, který byl upraven.</p>
+    <a href="http://localhost:8000/api/project/get/{{projectId}}" class="button">Podívat se na projekt</a>
     <div class="footer">
       Team Yira
     </div>

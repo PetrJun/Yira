@@ -5,7 +5,7 @@ const projectDAO = require("../../DAO/projectDAO.js");
 const userDAO = require("../../DAO/userDAO.js");
 const { State } = require("../../hellpers/enumState.js");
 const { validateDateTime } = require("../../hellpers/validateDatetime.js");
-const addFieldsToCreateProject = require("../../hellpers/projectFunctions.js");
+const { addFieldsToCreateProject, existingUsersInProject } = require("../../hellpers/projectFunctions.js");
 const sendMail = require("../../hellpers/sendMail.js");
 
 ajv.addFormat("date-time", { validate: validateDateTime });
@@ -57,12 +57,9 @@ async function CreateAbl(req, res) {
 
         project.createdAt = new Date().toISOString();
 
-        const users = userDAO.list();
-        const userIds = users.map((user) => user.id);
+        const existingUsers = existingUsersInProject(project.userList);
 
-        const notInUsers = project.userList.filter((value) => !userIds.includes(value));
-
-        if (notInUsers > 0) {
+        if (!existingUsers) {
             res.status(404).json({
                 code: "usersNotFound",
                 message: `User(s) ${notInUsers} not found`,

@@ -47,6 +47,7 @@ async function UpdateAbl(req, res) {
 
         if (updatedTask.createdBy === updatedTask.assigneeUser) {
             res.json(updatedTask);
+            return;
         }
 
         if (updatedTask.name !== oldTask.name) {

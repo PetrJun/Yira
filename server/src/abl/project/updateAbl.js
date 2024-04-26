@@ -1,20 +1,18 @@
 const Ajv = require("ajv");
 const ajv = new Ajv();
 
-const taskDAO = require("../../DAO/taskDAO.js");
+const projectDAO = require("../../DAO/projectDAO.js");
 const userDao = require("../../DAO/userDAO.js");
 const { State } = require("../../hellpers/enumState.js");
 const { validateDateTime } = require("../../hellpers/validateDatetime.js");
 const sendMail = require("../../hellpers/sendMail.js");
+const { existingUsersInProject } = require("../../hellpers/projectFunctions.js");
 
 ajv.addFormat("date-time", { validate: validateDateTime });
-
-//TODO: dodelat ABL update
 
 const schema = {
     type: "object",
     properties: {
-        projectId: { type: "string", minLength: 32, maxLength: 32 },
         name: { type: "string" },
         assigneeUser: { type: "string", minLength: 32, maxLength: 32 },
         state: { type: "string", enum: Object.values(State) },
@@ -22,18 +20,22 @@ const schema = {
         estimate: { type: "number" },
         worked: { type: "number", default: 0 },
         description: { type: "string", maxLength: 500 },
+        userList: {
+            type: "array",
+            items: { type: "string", minLength: 32, maxLength: 32 },
+        },
     },
     additionalProperties: false,
 };
 
 async function UpdateAbl(req, res) {
     try {
-        const { id } = req.params;
-        let task = req.body;
+        const { projectId, userId } = req.params;
+        let project = req.body;
         let assignedUserName, assignedUserEmail, sendReq;
 
         // validate input
-        const valid = ajv.validate(schema, task);
+        const valid = ajv.validate(schema, project);
         if (!valid) {
             res.status(400).json({
                 code: "dtoInIsNotValid",
@@ -43,42 +45,61 @@ async function UpdateAbl(req, res) {
             return;
         }
 
-        task.id = id;
-        oldTask = taskDAO.get(task.id);
-        updatedTask = taskDAO.update(task)
+        project.id = projectId;
+        oldProject = projectDAO.get(project.id);
 
-        if (updatedTask.createdBy === updatedTask.assigneeUser) {
-            res.json(updatedTask);
+        console.log(oldProject.createdBy, userId)
+
+        if(oldProject.createdBy !== userId) {
+            res.status(400).json({ message: `User: ${userId} can't delete project` });
+            return;
         }
 
-        if (updatedTask.name !== oldTask.name) {
-            assignedUserName = userDao.get(oldTask.assigneeUser).name;
-            assignedUserEmail = userDao.get(oldTask.assigneeUser).email;
+        if(project.userList){
+            const existingUsers = existingUsersInProject(project.userList);
+
+            if (!existingUsers) {
+                res.status(404).json({
+                    code: "usersNotFound",
+                    message: `User(s) ${notInUsers} not found`,
+                });
+                return;
+            }
+        }
+
+        updatedProject = projectDAO.update(project)
+
+        if (updatedProject.createdBy === updatedProject.assigneeUser) {
+            res.json(updatedProject);
+            return;
+        }
+
+        assignedUserName = userDao.get(oldProject.assigneeUser).name;
+        assignedUserEmail = userDao.get(oldProject.assigneeUser).email;
+        if (updatedProject.name !== oldProject.name) {
 
             sendReq = {
                 recipient: assignedUserName,
                 recipientMail: assignedUserEmail,
-                taskId: oldTask.id,
-                taskName: oldTask.name,
-                taskNameNew: updatedTask.name
+                projectId: oldProject.id,
+                projectName: oldProject.name,
+                projectNameNew: updatedProject.name
             };
 
-            sendMail(sendReq, "updateTaskNameNotfication");
+            sendMail(sendReq, "updateProjectNameNotfication");
         } else {
-            assignedUserName = userDao.get(oldTask.assigneeUser).name;
-            assignedUserEmail = userDao.get(oldTask.assigneeUser).email;
 
             sendReq = {
                 recipient: assignedUserName,
                 recipientMail: assignedUserEmail,
-                taskId: oldTask.id,
-                taskName: oldTask.name
+                projectId: oldProject.id,
+                projectName: oldProject.name
             };
 
-            sendMail(sendReq, "updateTaskNotfication");
+            sendMail(sendReq, "updateProjectNotfication");
         }
 
-        res.json(updatedTask);
+        res.json(updatedProject);
     } catch (e) {
         res.status(500).json({ message: e.message });
     }

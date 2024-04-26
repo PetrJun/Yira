@@ -1,4 +1,5 @@
 const { State } = require("./enumState");
+const userDAO = require('../DAO/userDAO.js');
 
 
 function addFieldsToCreateProject(req) {
@@ -18,4 +19,21 @@ function addFieldsToCreateProject(req) {
     }
 }
 
-module.exports = addFieldsToCreateProject;
+function existingUsersInProject(list) {
+    const users = userDAO.list();
+    const userIds = users.map((user) => user.id);
+
+    const notInUsers = list.filter((value) => !userIds.includes(value));
+
+    if (notInUsers > 0) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
+module.exports = {
+    addFieldsToCreateProject, 
+    existingUsersInProject
+};

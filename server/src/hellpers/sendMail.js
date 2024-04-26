@@ -26,6 +26,14 @@ const deletedProjectNotification = path.join(
     __dirname,
     "../templates/deletedProjectNotification.html"
 );
+const updateProjectNameNotfication = path.join(
+    __dirname,
+    "../templates/updateProjectNameNotfication.html"
+);
+const updateProjectNotfication = path.join(
+    __dirname,
+    "../templates/updateProjectNotfication.html"
+);
 // more templates
 
 const transporter = nodemailer.createTransport({
@@ -85,6 +93,12 @@ function createEmailTemplate(template) {
         case "deletedProjectNotification":
             emailTemplate = deletedProjectNotification;
             break;
+        case "updateProjectNameNotfication":
+            emailTemplate = updateProjectNameNotfication;
+            break;
+        case "updateProjectNotfication":
+            emailTemplate = updateProjectNotfication;
+            break;
     }
 
     return emailTemplate;
@@ -99,6 +113,7 @@ function createDataForMailDistribution(sendReq, template, data) {
     const taskNameNew = sendReq.taskNameNew;
     const projectId = sendReq.projectId;
     const projectName = sendReq.projectName;
+    const projectNameNew = sendReq.projectNameNew;
 
     let htmlTemplate, subject;
 
@@ -140,6 +155,19 @@ function createDataForMailDistribution(sendReq, template, data) {
             .replace("{{sender}}", sender)
             .replace("{{projectName}}", projectName);
         subject = "Smazan projekt na kterem jsi byl prirazen";
+    } else if (template == "updateProjectNameNotfication") {
+        htmlTemplate = data
+            .replace("{{recipient}}", recipient)
+            .replace("{{projectName}}", projectName)
+            .replace("{{projectNameNew}}", projectNameNew)
+            .replace("{{projectId}}", projectId);
+        subject = "Aktualizovan nazev projektu";
+    } else if (template == "updateProjectNotfication") {
+        htmlTemplate = data
+            .replace("{{recipient}}", recipient)
+            .replace("{{projectName}}", projectName)
+            .replace("{{projectId}}", projectId);
+        subject = "Aktualizovan projekt";
     }
 
     return {
