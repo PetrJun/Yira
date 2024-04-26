@@ -51,7 +51,7 @@ async function CreateAbl(req, res) {
             return;
         }
 
-        task = addFieldsToCreateTask(req.body);
+        task = addFieldsToCreateTask(task);
 
         task.createdAt = new Date().toISOString();
 
@@ -59,6 +59,7 @@ async function CreateAbl(req, res) {
 
         if (task.createdBy === task.assigneeUser) {
             res.json(task);
+            return;
         }
 
         createdByName = userDao.get(task.createdBy).name;

@@ -3,9 +3,6 @@ const addFormats = require("ajv-formats").default;
 const ajv = new Ajv();
 addFormats(ajv);
 
-const { validateDateTime } = require("../../hellpers/validateDatetime.js");
-ajv.addFormat("date-time", { validate: validateDateTime });
-
 const userDao = require("../../DAO/userDAO.js");
 
 const schema = {

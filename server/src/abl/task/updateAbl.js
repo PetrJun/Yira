@@ -50,10 +50,10 @@ async function UpdateAbl(req, res) {
             return;
         }
 
-        if (updatedTask.name !== oldTask.name) {
-            assignedUserName = userDao.get(oldTask.assigneeUser).name;
-            assignedUserEmail = userDao.get(oldTask.assigneeUser).email;
+        assignedUserName = userDao.get(oldTask.assigneeUser).name;
+        assignedUserEmail = userDao.get(oldTask.assigneeUser).email;
 
+        if (updatedTask.name !== oldTask.name) {
             sendReq = {
                 recipient: assignedUserName,
                 recipientMail: assignedUserEmail,
@@ -64,9 +64,6 @@ async function UpdateAbl(req, res) {
 
             sendMail(sendReq, "updateTaskNameNotfication");
         } else {
-            assignedUserName = userDao.get(oldTask.assigneeUser).name;
-            assignedUserEmail = userDao.get(oldTask.assigneeUser).email;
-
             sendReq = {
                 recipient: assignedUserName,
                 recipientMail: assignedUserEmail,
