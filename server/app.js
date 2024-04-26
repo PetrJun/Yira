@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true })); // podpora pro application/x-ww
 
 app.use(cors());
 
-app.get("/", (req, res) => {
+app.get("/helloworld", (req, res) => {
   res.send("Hello World!");
 });
 
