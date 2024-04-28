@@ -1,4 +1,5 @@
 const { State } = require("./enumState");
+const projectDao = require("../DAO/projectDAO.js");
 
 
 function addFieldsToCreateTask(req) {
@@ -18,4 +19,20 @@ function addFieldsToCreateTask(req) {
     }
 }
 
-module.exports = addFieldsToCreateTask;
+function canBeAssignedOnTask(userId, projectId) {
+    const projectUsers = projectDao.get(projectId).projectUsers;
+
+    return projectUsers.find(id => id === userId);
+}
+
+function existsProjectId(projectId) {
+    const projectIds = projectDao.list();
+
+    return projectIds.find(id => id === projectId);
+}
+
+module.exports = {
+    addFieldsToCreateTask,
+    canBeAssignedOnTask,
+    existsProjectId
+};

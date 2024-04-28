@@ -5,7 +5,7 @@ const taskDAO = require("../../DAO/taskDAO.js");
 const userDao = require("../../DAO/userDAO.js");
 const { State } = require("../../hellpers/enumState.js");
 const { validateDateTime } = require("../../hellpers/validateDatetime.js");
-const addFieldsToCreateTask = require("../../hellpers/taskFunctions.js");
+const { addFieldsToCreateTask, canBeAssignedOnTask, existsProjectId } = require("../../hellpers/taskFunctions.js");
 const sendMail = require("../../hellpers/sendMail.js");
 
 ajv.addFormat("date-time", { validate: validateDateTime });
@@ -52,6 +52,26 @@ async function CreateAbl(req, res) {
         }
 
         task = addFieldsToCreateTask(task);
+
+        const existsProject = existsProjectId(task.projectId);
+
+        if (!existsProject) {
+            res.status(404).json({
+                code: "projectNotFound",
+                message: `Project ${task.projectId} not found`,
+            });
+            return;
+        }
+
+        const canBeAssigneeUser = canBeAssignedOnTask(task.assigneeUser, task.projectId);
+
+        if (!canBeAssigneeUser) {
+            res.status(404).json({
+                code: "usersNotFound",
+                message: `User ${task.assigneeUser} not found on project`,
+            });
+            return;
+        }
 
         task.createdAt = new Date().toISOString();
 
