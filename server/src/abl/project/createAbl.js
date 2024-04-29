@@ -53,6 +53,14 @@ async function CreateAbl(req, res) {
             return;
         }
 
+        if(userDAO.get(project.createdBy).role !== "projectManager"){
+            res.status(404).json({
+                code: "usersCantCreateProject",
+                message: `User ${project.createdBy} cant create project, user needs this role: "projectManager"`,
+            });
+            return;
+        }
+
         project = addFieldsToCreateProject(req.body);
 
         project.createdAt = new Date().toISOString();
@@ -71,6 +79,7 @@ async function CreateAbl(req, res) {
 
         if (project.createdBy === project.assigneeUser) {
             res.json(project);
+            return;
         }
 
         createdByName = userDAO.get(project.createdBy).name;
@@ -84,7 +93,6 @@ async function CreateAbl(req, res) {
             projectId: project.id,
         };
 
-        // TODO: for cyklus na poslani notifikace pro lidi pracujici na projektu
         sendMail(sendReq, "createProjectToAssignedUserNotfication");
 
         res.json(project);

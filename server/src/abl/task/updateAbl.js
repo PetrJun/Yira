@@ -6,6 +6,7 @@ const userDao = require("../../DAO/userDAO.js");
 const { State } = require("../../hellpers/enumState.js");
 const { validateDateTime } = require("../../hellpers/validateDatetime.js");
 const sendMail = require("../../hellpers/sendMail.js");
+const { userOnTask } = require("../../hellpers/taskFunctions.js");
 
 ajv.addFormat("date-time", { validate: validateDateTime });
 
@@ -26,7 +27,7 @@ const schema = {
 
 async function UpdateAbl(req, res) {
     try {
-        const { id } = req.params;
+        const { taskId, userId } = req.params;
         let task = req.body;
         let assignedUserName, assignedUserEmail, sendReq;
 
@@ -41,8 +42,19 @@ async function UpdateAbl(req, res) {
             return;
         }
 
-        task.id = id;
+        task.id = taskId;
         oldTask = taskDAO.get(task.id);
+
+        const canUpdateTask = userOnTask(userId, oldTask.projectId);
+
+        if (!canUpdateTask) {
+            res.status(400).json({
+                code: "userCantUpdateTask",
+                message: `User ${userId} cant update task`,
+            });
+            return;
+        }
+
         updatedTask = taskDAO.update(task)
 
         if (updatedTask.createdBy === updatedTask.assigneeUser) {

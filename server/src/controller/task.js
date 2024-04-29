@@ -8,9 +8,9 @@ const UpdateAbl = require("../abl/task/updateAbl");
 const UpdateAssigneeUserAbl = require("../abl/task/updateassigneeUserAbl");
 
 router.post("/create", CreateAbl);
-router.delete("/delete/:id", DeleteAbl);
+router.delete("/delete/:taskId/:userId", DeleteAbl);
 router.get("/get/:id", GetAbl);
-router.put("/update/:id", UpdateAbl);
-router.patch("/updateAssigneeUser/:taskId/:userId", UpdateAssigneeUserAbl);
+router.put("/update/:taskId/:userId", UpdateAbl);
+router.patch("/updateAssigneeUser/:taskId/:assigneeId/:userId", UpdateAssigneeUserAbl);
 
 module.exports = router;

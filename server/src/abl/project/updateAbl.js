@@ -49,7 +49,7 @@ async function UpdateAbl(req, res) {
         oldProject = projectDAO.get(project.id);
 
         if(oldProject.createdBy !== userId) {
-            res.status(400).json({ message: `User: ${userId} can't delete project` });
+            res.status(400).json({ message: `User: ${userId} can't edit project` });
             return;
         }
 
@@ -75,7 +75,6 @@ async function UpdateAbl(req, res) {
         assignedUserName = userDao.get(oldProject.assigneeUser).name;
         assignedUserEmail = userDao.get(oldProject.assigneeUser).email;
         if (updatedProject.name !== oldProject.name) {
-
             sendReq = {
                 recipient: assignedUserName,
                 recipientMail: assignedUserEmail,
@@ -83,17 +82,14 @@ async function UpdateAbl(req, res) {
                 projectName: oldProject.name,
                 projectNameNew: updatedProject.name
             };
-
             sendMail(sendReq, "updateProjectNameNotfication");
         } else {
-
             sendReq = {
                 recipient: assignedUserName,
                 recipientMail: assignedUserEmail,
                 projectId: oldProject.id,
                 projectName: oldProject.name
             };
-
             sendMail(sendReq, "updateProjectNotfication");
         }
 

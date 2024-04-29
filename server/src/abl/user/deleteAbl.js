@@ -6,16 +6,6 @@ async function DeleteAbl(req, res) {
   try {
     const { id } = req.params;
 
-    // TODO: Task and Project 
-    // const attendanceMap = attendanceDao.userMap();
-    // if (attendanceMap[id]) {
-    //   res.status(400).json({
-    //     code: "userHasAttendances",
-    //     message: `User ${reqParams.id} has attendances`,
-    //   });
-    //   return;
-    // }
-
     userDao.remove(id);
 
     res.json({});

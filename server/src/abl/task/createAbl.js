@@ -5,7 +5,7 @@ const taskDAO = require("../../DAO/taskDAO.js");
 const userDao = require("../../DAO/userDAO.js");
 const { State } = require("../../hellpers/enumState.js");
 const { validateDateTime } = require("../../hellpers/validateDatetime.js");
-const { addFieldsToCreateTask, canBeAssignedOnTask, existsProjectId } = require("../../hellpers/taskFunctions.js");
+const { addFieldsToCreateTask, userOnTask, existsProjectId } = require("../../hellpers/taskFunctions.js");
 const sendMail = require("../../hellpers/sendMail.js");
 
 ajv.addFormat("date-time", { validate: validateDateTime });
@@ -30,7 +30,6 @@ const schema = {
         "createdBy",
         "estimate",
         "description",
-        "userList",
     ],
     additionalProperties: false,
 };
@@ -53,6 +52,8 @@ async function CreateAbl(req, res) {
 
         task = addFieldsToCreateTask(task);
 
+        task.createdAt = new Date().toISOString();
+
         const existsProject = existsProjectId(task.projectId);
 
         if (!existsProject) {
@@ -63,17 +64,25 @@ async function CreateAbl(req, res) {
             return;
         }
 
-        const canBeAssigneeUser = canBeAssignedOnTask(task.assigneeUser, task.projectId);
+        const canCreateTask = userOnTask(task.createdBy, task.projectId);
 
-        if (!canBeAssigneeUser) {
-            res.status(404).json({
+        if (!canCreateTask) {
+            res.status(400).json({
                 code: "usersNotFound",
-                message: `User ${task.assigneeUser} not found on project`,
+                message: `User ${task.createdBy} cant create task`,
             });
             return;
         }
 
-        task.createdAt = new Date().toISOString();
+        const canBeAssigneeUser = userOnTask(task.assigneeUser, task.projectId);
+
+        if (!canBeAssigneeUser) {
+            res.status(404).json({
+                code: "usersNotFound",
+                message: `User ${task.assigneeUser} not found on project in userList`,
+            });
+            return;
+        }
 
         task = taskDAO.create(task);
 

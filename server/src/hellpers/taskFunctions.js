@@ -19,20 +19,21 @@ function addFieldsToCreateTask(req) {
     }
 }
 
-function canBeAssignedOnTask(userId, projectId) {
-    const projectUsers = projectDao.get(projectId).projectUsers;
+function userOnTask(userId, projectId) {
+    const projectUsers = projectDao.get(projectId).userList;
 
     return projectUsers.find(id => id === userId);
 }
 
 function existsProjectId(projectId) {
-    const projectIds = projectDao.list();
+    const projects = projectDao.list();
+    const projectIds = projects.map((project) => project.id);
 
     return projectIds.find(id => id === projectId);
 }
 
 module.exports = {
     addFieldsToCreateTask,
-    canBeAssignedOnTask,
+    userOnTask,
     existsProjectId
 };

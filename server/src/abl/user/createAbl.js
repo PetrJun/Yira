@@ -11,8 +11,9 @@ const schema = {
     name: { type: "string", minLength: 3 },
     surname: { type: "string", minLength: 3 },
     email: { type: "string", format: "email" },
+    role: { type: "string", enum: ["projectManager", "teamMember"] },
   },
-  required: ["name", "surname", "email"],
+  required: ["name", "surname", "email", "role"],
   additionalProperties: false,
 };
 

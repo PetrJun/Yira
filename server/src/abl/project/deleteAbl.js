@@ -16,7 +16,7 @@ async function DeleteAbl(req, res) {
         projectDao.remove(projectId);
 
         if(deletedProject.createdBy === deletedProject.assigneeUser) {
-            res.json(task);
+            res.json({});
             return;
         }
 

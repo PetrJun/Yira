@@ -1,0 +1,16 @@
+{
+    "name": "Third Project",
+    "createdBy": "589e97044517a68c8c69743aeaaf85c1",
+    "assigneeUser": "75698d897d2dfb41cc35610e0b8f9819",
+    "state": "TODO",
+    "deadline": "2024-04-30T12:00:00Z",
+    "estimate": 5,
+    "worked": 0,
+    "description": "Project description",
+    "userList": [
+        "75698d897d2dfb41cc35610e0b8f9819",
+        "589e97044517a68c8c69743aeaaf85c1"
+    ],
+    "createdAt": "2024-04-29T19:52:42.027Z",
+    "id": "05153e7029041e5ee6759410c61f0d5b"
+}
