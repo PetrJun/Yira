@@ -36,10 +36,7 @@ async function GetTasksAndProjectsOnUserAbl(req, res) {
         projects.filter((project) => project.userList.includes(userId));
 
         if (projects.length == 0) {
-            res.status(404).json({
-                code: "projectsNotFound",
-                message: `Projects not found where user: ${userId} can work`,
-            });
+            res.status(204).json([]);
             return;
         }
 

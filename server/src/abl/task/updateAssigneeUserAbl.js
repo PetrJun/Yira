@@ -22,7 +22,7 @@ async function UpdateAssigneeUserAbl(req, res) {
 
         if (!canUpdateAssignee) {
             res.status(400).json({
-                code: "userCantUpdateassigneeUser",
+                code: "userCantUpdateAssigneeUser",
                 message: `User ${userId} cant update assignee user`,
             });
             return;
