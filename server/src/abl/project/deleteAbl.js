@@ -8,18 +8,22 @@ async function DeleteAbl(req, res) {
 
         deletedProject = projectDao.get(projectId);
 
+        // check if user can delete project
         if(deletedProject.createdBy !== userId) {
             res.status(400).json({ message: `User: ${userId} can't delete project` });
             return;
         }
 
+        // uses remove DAO method to delete project
         projectDao.remove(projectId);
 
+        // check createdBy and assigneeUser
         if(deletedProject.createdBy === deletedProject.assigneeUser) {
             res.json({});
             return;
         }
 
+        // send email notification to assignee user
         createdByName = userDao.get(deletedProject.createdBy).name;
         assignedUserName = userDao.get(deletedProject.assigneeUser).name;
         assignedUserEmail = userDao.get(deletedProject.assigneeUser).email;

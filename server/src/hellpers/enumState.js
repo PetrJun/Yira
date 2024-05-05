@@ -1,3 +1,4 @@
+// Enum of states
 const State = {
     TODO: "TODO",
     INPROGRESS: "INPROGRESS",

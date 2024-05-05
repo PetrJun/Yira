@@ -1,5 +1,4 @@
 const express = require("express");
-
 const router = express.Router();
 
 const GetAbl = require("../abl/user/getAbl.js");

@@ -53,6 +53,7 @@ async function CreateAbl(req, res) {
             return;
         }
 
+        // check createdBy user role
         if(userDAO.get(project.createdBy).role !== "projectManager"){
             res.status(404).json({
                 code: "usersCantCreateProject",
@@ -61,12 +62,14 @@ async function CreateAbl(req, res) {
             return;
         }
 
+        // adds fields
         project = addFieldsToCreateProject(req.body);
 
+        // adds createdAt
         project.createdAt = new Date().toISOString();
 
+        // checks users in userList
         const notExistingUsers = existingUsersInProject(project.userList);
-
         if (notExistingUsers > 0) {
             res.status(404).json({
                 code: "usersNotFound",
@@ -75,13 +78,16 @@ async function CreateAbl(req, res) {
             return;
         }
 
+        // uses create DAO method to create project
         project = projectDAO.create(project);
 
+        // checks createdBy and assigneeUser
         if (project.createdBy === project.assigneeUser) {
             res.json(project);
             return;
         }
 
+        // send email notification to assignee user
         createdByName = userDAO.get(project.createdBy).name;
         assignedUserName = userDAO.get(project.assigneeUser).name;
         assignedUserEmail = userDAO.get(project.assigneeUser).email;

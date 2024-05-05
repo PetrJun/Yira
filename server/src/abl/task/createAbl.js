@@ -50,12 +50,14 @@ async function CreateAbl(req, res) {
             return;
         }
 
+        // adds fields
         task = addFieldsToCreateTask(task);
 
+        // adds createdAt
         task.createdAt = new Date().toISOString();
 
+        // checks projectId if exists
         const existsProject = existsProjectId(task.projectId);
-
         if (!existsProject) {
             res.status(404).json({
                 code: "projectNotFound",
@@ -64,8 +66,8 @@ async function CreateAbl(req, res) {
             return;
         }
 
+        // checks if user can create task
         const canCreateTask = userOnTask(task.createdBy, task.projectId);
-
         if (!canCreateTask) {
             res.status(400).json({
                 code: "usersNotFound",
@@ -74,8 +76,8 @@ async function CreateAbl(req, res) {
             return;
         }
 
+        // checks if assingneeUser can be assigned on task
         const canBeAssigneeUser = userOnTask(task.assigneeUser, task.projectId);
-
         if (!canBeAssigneeUser) {
             res.status(404).json({
                 code: "usersNotFound",
@@ -84,13 +86,16 @@ async function CreateAbl(req, res) {
             return;
         }
 
+        // uses create DAO method to create task
         task = taskDAO.create(task);
 
+        // checks createdBy and assigneeUser
         if (task.createdBy === task.assigneeUser) {
             res.json(task);
             return;
         }
 
+        // send email notification to assignee user
         createdByName = userDao.get(task.createdBy).name;
         assignedUserName = userDao.get(task.assigneeUser).name;
         assignedUserEmail = userDao.get(task.assigneeUser).email;

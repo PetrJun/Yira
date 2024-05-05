@@ -45,14 +45,17 @@ async function UpdateAbl(req, res) {
             return;
         }
 
+        // add id to project
         project.id = projectId;
         oldProject = projectDAO.get(project.id);
 
+        // if userId is not createdBy throw error
         if(oldProject.createdBy !== userId) {
             res.status(400).json({ message: `User: ${userId} can't edit project` });
             return;
         }
 
+        // if is updating userList check all users in new userList
         if(project.userList){
             const notExistingUsers = existingUsersInProject(project.userList);
 
@@ -65,13 +68,16 @@ async function UpdateAbl(req, res) {
             }
         }
 
+        // uses update DAO method to update project
         updatedProject = projectDAO.update(project)
 
+        // checks createdBy and assigneeUser
         if (updatedProject.createdBy === updatedProject.assigneeUser) {
             res.json(updatedProject);
             return;
         }
 
+        // send mail notification
         assignedUserName = userDao.get(oldProject.assigneeUser).name;
         assignedUserEmail = userDao.get(oldProject.assigneeUser).email;
         if (updatedProject.name !== oldProject.name) {

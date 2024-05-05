@@ -6,6 +6,7 @@ async function GetAbl(req, res) {
 
         const task = taskDAO.get(id);
 
+        // checks task if is null
         if (task === null) {
             res.status(404).json({
                 code: "taskNotFound",

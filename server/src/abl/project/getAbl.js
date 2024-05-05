@@ -6,6 +6,7 @@ async function GetAbl(req, res) {
 
         const project = projectDAO.get(id);
 
+        // checks project if is null
         if (project === null) {
             res.status(404).json({
                 code: "projectNotFound",

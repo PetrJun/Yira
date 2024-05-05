@@ -1,7 +1,11 @@
 const { State } = require("./enumState");
 const userDAO = require('../DAO/userDAO.js');
 
-
+/**
+ * 
+ * @param {*} req 
+ * @returns updated DTO in
+ */
 function addFieldsToCreateProject(req) {
     let assigneeUser, state;
     !req.assigneeUser ? assigneeUser = req.createdBy : assigneeUser = req.assigneeUser;
@@ -19,6 +23,11 @@ function addFieldsToCreateProject(req) {
     }
 }
 
+/**
+ * 
+ * @param {*} list 
+ * @returns list of users who is not in project userList
+ */
 function existingUsersInProject(list) {
     const users = userDAO.list();
     const userIds = users.map((user) => user.id);

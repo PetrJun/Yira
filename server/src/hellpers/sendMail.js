@@ -2,6 +2,7 @@ const nodemailer = require("nodemailer");
 const path = require("path");
 const fs = require("fs");
 
+//templates
 const createTaskNotfication = path.join(
     __dirname,
     "../templates/createTaskNotfication.html"
@@ -38,8 +39,8 @@ const updateTaskAssigneeUserNotfication = path.join(
     __dirname,
     "../templates/updateTaskAssigneeUserNotfication.html"
 );
-// more templates
 
+// email from
 const transporter = nodemailer.createTransport({
     host: "smtp.seznam.cz",
     port: 465,
@@ -50,6 +51,12 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+/**
+ *
+ * @param {*} sendReq - request for mail template
+ * @param {*} template - mail template
+ * @description sends mail
+ */
 function sendMail(sendReq, template) {
     fs.readFile(createEmailTemplate(template), "utf8", (err, data) => {
         if (err) {
@@ -74,6 +81,11 @@ function sendMail(sendReq, template) {
     });
 }
 
+/**
+ *
+ * @param {*} template
+ * @returns return template file
+ */
 function createEmailTemplate(template) {
     let emailTemplate;
 
@@ -110,6 +122,13 @@ function createEmailTemplate(template) {
     return emailTemplate;
 }
 
+/**
+ * 
+ * @param {*} sendReq - request for mail template
+ * @param {*} template - template name
+ * @param {*} data - file of template
+ * @returns mailOptions with template
+ */
 function createDataForMailDistribution(sendReq, template, data) {
     const sender = sendReq.sender;
     const recipient = sendReq.recipient;

@@ -42,11 +42,12 @@ async function UpdateAbl(req, res) {
             return;
         }
 
+        // add id to task
         task.id = taskId;
         oldTask = taskDAO.get(task.id);
 
+        // if userId is not in userList of project throw error
         const canUpdateTask = userOnTask(userId, oldTask.projectId);
-
         if (!canUpdateTask) {
             res.status(400).json({
                 code: "userCantUpdateTask",
@@ -55,16 +56,18 @@ async function UpdateAbl(req, res) {
             return;
         }
 
+        // uses update DAO method to update task
         updatedTask = taskDAO.update(task)
 
+        // checks createdBy and assigneeUser
         if (updatedTask.createdBy === updatedTask.assigneeUser) {
             res.json(updatedTask);
             return;
         }
 
+        // send mail notification
         assignedUserName = userDao.get(oldTask.assigneeUser).name;
         assignedUserEmail = userDao.get(oldTask.assigneeUser).email;
-
         if (updatedTask.name !== oldTask.name) {
             sendReq = {
                 recipient: assignedUserName,

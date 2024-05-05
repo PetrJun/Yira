@@ -9,8 +9,8 @@ async function DeleteAbl(req, res) {
 
         deletedTask = taskDao.get(taskId);
 
+        // check if user can delete task
         const canDeleteTask = userOnTask(userId, deletedTask.projectId);
-
         if (!canDeleteTask) {
             res.status(400).json({
                 code: "userCantDeleteTask",
@@ -19,12 +19,15 @@ async function DeleteAbl(req, res) {
             return;
         }
 
+        // uses remove DAO method to delete task
         taskDao.remove(taskId);
 
-        if(userId === deletedTask.assigneeUser) {
+        // check createdBy and assigneeUser
+        if (userId === deletedTask.assigneeUser) {
             res.json(task);
         }
 
+        // send email notification to assignee user
         deleterName = userDao.get(userId).name;
         assignedUserName = userDao.get(deletedTask.assigneeUser).name;
         assignedUserEmail = userDao.get(deletedTask.assigneeUser).email;
@@ -33,15 +36,15 @@ async function DeleteAbl(req, res) {
             sender: deleterName,
             recipient: assignedUserName,
             recipientMail: assignedUserEmail,
-            taskName: deletedTask.name
-        }
+            taskName: deletedTask.name,
+        };
 
         sendMail(sendReq, "deletedTaskNotification");
-  
+
         res.json({});
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
-  }
+}
 
-  module.exports = DeleteAbl;
+module.exports = DeleteAbl;

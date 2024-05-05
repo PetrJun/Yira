@@ -6,6 +6,7 @@ async function GetAbl(req, res) {
 
         const user = userDao.get(id);
 
+        // checks user if is null
         if (user === null) {
             res.status(404).json({
                 code: "userNotFound",

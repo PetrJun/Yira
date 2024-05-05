@@ -10,6 +10,7 @@ async function UpdateAssigneeUserAbl(req, res) {
 
         oldTask = taskDAO.get(taskId);
 
+        // checks task if is null
         if(oldTask === null){
             res.status(404).json({
                 code: "taskNotFound",
@@ -18,8 +19,8 @@ async function UpdateAssigneeUserAbl(req, res) {
             return;
         }
 
+        // check if userId can update assingeeUser
         const canUpdateAssignee = userOnTask(userId, oldTask.projectId);
-
         if (!canUpdateAssignee) {
             res.status(400).json({
                 code: "userCantUpdateAssigneeUser",
@@ -28,8 +29,8 @@ async function UpdateAssigneeUserAbl(req, res) {
             return;
         }
 
+        // check if assigneeId can be assigned on task
         const canUpdateAssigneeUserOnTask = userOnTask(assigneeId, oldTask.projectId);
-
         if (!canUpdateAssigneeUserOnTask) {
             res.status(400).json({
                 code: "userCantBeAssignedOnTask",
@@ -38,11 +39,12 @@ async function UpdateAssigneeUserAbl(req, res) {
             return;
         }
 
+        // uses update DAO method to update project
         updatedTask = taskDAO.update({id: taskId, assigneeUser: assigneeId})
 
+        // send mail notification
         assignedUserName = userDao.get(updatedTask.assigneeUser).name;
         assignedUserEmail = userDao.get(updatedTask.assigneeUser).email;
-
         sendReq = {
             recipient: assignedUserName,
             recipientMail: assignedUserEmail,

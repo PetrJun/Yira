@@ -17,9 +17,9 @@ app.get("/helloworld", (req, res) => {
 });
 
 
-app.use("/api/task", taskController);
-app.use("/api/user", userController);
-app.use("/api/project", projectController);
+app.use("/api/task", taskController); // task controller
+app.use("/api/user", userController); // user controller
+app.use("/api/project", projectController); // project controller
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

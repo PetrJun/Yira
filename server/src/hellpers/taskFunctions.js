@@ -1,7 +1,11 @@
 const { State } = require("./enumState");
 const projectDao = require("../DAO/projectDAO.js");
 
-
+/**
+ * 
+ * @param {*} req 
+ * @returns updated DTO in
+ */
 function addFieldsToCreateTask(req) {
     let assigneeUser, state;
     !req.assigneeUser ? assigneeUser = req.createdBy : assigneeUser = req.assigneeUser;
@@ -19,12 +23,23 @@ function addFieldsToCreateTask(req) {
     }
 }
 
+/**
+ * 
+ * @param {*} userId 
+ * @param {*} projectId 
+ * @returns true if is user in userList of project
+ */
 function userOnTask(userId, projectId) {
     const projectUsers = projectDao.get(projectId).userList;
 
     return projectUsers.find(id => id === userId);
 }
 
+/**
+ * 
+ * @param {*} projectId 
+ * @returns true if projectId exists
+ */
 function existsProjectId(projectId) {
     const projects = projectDao.list();
     const projectIds = projects.map((project) => project.id);
