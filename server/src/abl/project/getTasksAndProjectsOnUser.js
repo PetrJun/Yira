@@ -36,11 +36,11 @@ async function GetTasksAndProjectsOnUserAbl(req, res) {
         let projects = projectDAO.list();
 
         // filter projects where is our userId in userList in projects
-        projects.filter((project) => project.userList.includes(userId));
+        projects = projects.filter((project) => project.userList.includes(userId));
 
         // if user is not on projects in userList returns []
         if (projects.length == 0) {
-            res.status(204).json([]);
+            res.status(200).json([]);
             return;
         }
 
