@@ -28,18 +28,26 @@ function ProjectForm({ setShowProjectForm, project }) {
 
     const handleAddUser = () => {
         if (newUserValue.trim() !== "") {
-            setUsers([...users, newUserValue].filter((value, index, self) => {
-                return self.indexOf(value) === index;
-              }));
+            setUsers(
+                [...users, newUserValue].filter((value, index, self) => {
+                    return self.indexOf(value) === index;
+                })
+            );
             setNewUserValue("");
         }
     };
     const handleDeleteUser = (userIdToDelete) => {
-        setUsers(users.filter(userId => userId !== userIdToDelete));
+        setUsers(users.filter((userId) => userId !== userIdToDelete));
     };
 
+    useEffect(() => {
+        if (!users.includes(loggedInUser.id)) {
+            setUsers([...users, loggedInUser.id]);
+        }
+    }, [users, loggedInUser]);
+
     return (
-        <Modal show={true} onHide={() => setShowProjectForm(false)}>
+        <Modal show={true} onHide={() => setShowProjectForm(false)} size="lg">
             <Form
                 onSubmit={async (e) => {
                     e.preventDefault();
@@ -53,6 +61,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                             ? parseInt(formData.worked)
                             : 0;
                         formData.assigneeUser = selectedAssigneeUser;
+                        formData.userList = users;
                         if (project.id) {
                             formData.id = project.id;
                             await handlerMapProject.handleUpdate(formData);
@@ -113,26 +122,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                             className="mb-3"
                             controlId="formBasicEmail"
                         >
-                            <Form.Label>Deadline</Form.Label>
-                            <Form.Control
-                                type="date"
-                                name="deadline"
-                                // required
-                                defaultValue={
-                                    project.date
-                                        ? eventDateToInput(project.deadline)
-                                        : undefined
-                                }
-                            />
-                        </Form.Group>
-                    </Row>
-                    <Row className="mb-3">
-                        <Form.Group
-                            as={Col}
-                            className="mb-3"
-                            controlId="formBasicEmail"
-                        >
-                            <Form.Label>Zadejte novou položku:</Form.Label>
+                            <Form.Label>Users on project</Form.Label>
                             <Form.Select
                                 value={newUserValue}
                                 onChange={(e) => {
@@ -155,10 +145,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                             className="mb-3"
                             controlId="formBasicEmail"
                         >
-                            <Button
-                                variant="primary"
-                                onClick={handleAddUser}
-                            >
+                            <Button variant="primary" onClick={handleAddUser}>
                                 Add user
                             </Button>
                         </Form.Group>
@@ -166,16 +153,107 @@ function ProjectForm({ setShowProjectForm, project }) {
                             .filter((user) => users.includes(user.id))
                             .map((user) => (
                                 <Row className="mb-3">
-                                <Col md={8}>
-                                    <p key={user.id} style={{backgroundColor: "lightblue", textAlign:"center"}}>
-                                        <b>{user.name} {user.surname}</b>
-                                    </p>
-                                </Col>
-                                <Col md={4}>
-                                    <Button variant="danger" onClick={() => handleDeleteUser(user.id)} style={{display:"flex"}}>Delete</Button>
-                                </Col>
+                                    <Col md={8}>
+                                        <p
+                                            key={user.id}
+                                            style={{
+                                                backgroundColor: "lightblue",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            <b>
+                                                {user.name} {user.surname}
+                                            </b>
+                                        </p>
+                                    </Col>
+                                    <Col md={4}>
+                                        <Button
+                                            variant="danger"
+                                            onClick={() =>
+                                                handleDeleteUser(user.id)
+                                            }
+                                            style={{ display: "flex" }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </Col>
                                 </Row>
                             ))}
+                    </Row>
+                    <Row className="mb-3">
+                        <Form.Group
+                            as={Col}
+                            className="mb-3"
+                            controlId="formBasicEmail"
+                        >
+                            <Form.Label>Assignee user</Form.Label>
+                            <Form.Select
+                                value={selectedAssigneeUser}
+                                onChange={(e) => {
+                                    console.log(e.target.value);
+                                    setSelectedAssigneeUser(e.target.value);
+                                }}
+                            >
+                                <option value="">Select assignee user</option>
+                                {userList
+                                    .filter((user) => users.includes(user.id))
+                                    .map((user) => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.name} {user.surname}
+                                        </option>
+                                    ))
+                                }
+                            </Form.Select>
+                        </Form.Group>
+                        <Form.Group
+                            as={Col}
+                            className="mb-3"
+                            controlId="formBasicEmail"
+                        >
+                            <Form.Label>State</Form.Label>
+                            <Form.Select
+                                value={selectedState}
+                                onChange={(e) => {
+                                    setSelectedState(e.target.value);
+                                }}
+                            >
+                                <option value="">Select state</option>
+                                <option key={1} value={1}>
+                                    TODO
+                                </option>
+                                <option key={2} value={2}>
+                                    INPROGRESS
+                                </option>
+                                <option key={3} value={3}>
+                                    DONE
+                                </option>
+                                <option key={4} value={4}>
+                                    CANCELLED
+                                </option>
+                                <option key={5} value={5}>
+                                    REVIEW
+                                </option>
+                            </Form.Select>
+                        </Form.Group>
+                    </Row>
+                    <Row className="mb-3">
+                        <Form.Group
+                            as={Col}
+                            className="mb-3"
+                            controlId="formBasicEmail"
+                        >
+                            <Form.Label>Deadline</Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="deadline"
+                                // required
+                                defaultValue={
+                                    project.date
+                                        ? eventDateToInput(project.deadline)
+                                        : undefined
+                                }
+                            />
+                        </Form.Group>
                     </Row>
                     <Row className="mb-3">
                         <Form.Group

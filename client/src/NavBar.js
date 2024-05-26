@@ -27,7 +27,11 @@ function NavBar() {
         </Navbar.Brand>
         <Nav>
           <NavDropdown
-            title={loggedInUser ? loggedInUser.name : "Přihlaš se"}
+            title={
+              <span style={{color:"white"}}>
+                {loggedInUser ? loggedInUser.name : "Přihlaš se"}
+              </span>
+            }
             drop={"start"}
           >
             {getUserMenuList({ userList, loggedInUser, handlerMap })}

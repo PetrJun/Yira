@@ -1,4 +1,5 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 // import { TasksAndProjectsOnUserContext } from "./TasksAndProjectsOnUserContext.js";
 import { UserContext } from "./UserContext.js";
 
@@ -10,16 +11,114 @@ import ProjectForm from "./ProjectForm.js";
 import Container from "react-bootstrap/esm/Container.js";
 
 import Icon from "@mdi/react";
-import { mdiPlusBoxOutline } from "@mdi/js";
+import { mdiPlusBoxOutline, mdiCheck } from "@mdi/js";
+import { DataGrid } from '@mui/x-data-grid';
+import { format } from 'date-fns';
 
 function Dashboard() {
     // const { tasksAndProjectsOnUser } = useContext(TasksAndProjectsOnUserContext);
     const { loggedInUser } = useContext(UserContext);
+    const navigate = useNavigate();
 
     const [showTaskForm, setShowTaskForm] = useState(false);
     const [showProjectForm, setShowProjectForm] = useState(false);
+    const [canCreateProject, setCanCreateProject] = useState(false);
+    const [rows, setRows] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const canCreateProject = loggedInUser?.role === "projectManager" ? false : true;
+    useEffect(() => {
+      if (loggedInUser?.role === "projectManager") {
+        setCanCreateProject(true)
+      } else {
+        setCanCreateProject(false)
+      }
+    }, [loggedInUser])
+
+    useEffect(() => {
+        if (loggedInUser && loggedInUser.id) {
+            setLoading(true);
+            fetch(`http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`)
+                .then(response => {
+                    if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    setRows(data);
+                    setLoading(false);
+                })
+                .catch(error => console.log(error));
+        }
+      }, [loggedInUser]);
+
+      const getColorForState = (state) => {
+        switch (state) {
+          case 'DONE':
+            return 'lightgreen';
+          case 'INPROGRESS':
+            return 'lightblue';
+          case 'TODO':
+            return 'lightyellow';
+          case 'CANCELLED':
+            return 'lightred';
+          case 'REVIEW':
+            return 'lightgray';
+          default:
+            return 'none';
+        }
+      };
+
+      const columns = [
+        { field: 'name', headerName: 'Name', width: 400 },
+        {
+          field: 'projectName',
+          headerName: 'Project name',
+          width: 150,
+          renderCell: (params) => {
+            if (params.row.projectName) {
+                return <Button
+                    variant="success"
+                    size="small"
+                    onClick={() => navigate(`/project?id=${params.row.projectId}`)}//
+                >
+                    {params.row.projectName}
+                </Button>
+            }
+            return null;
+          },
+        },
+        { field: 'assigneeUserObject', headerName: 'Assignee user', width: 200,
+            renderCell: (params) => (
+                <span style={{ backgroundColor: (loggedInUser && loggedInUser.id === params.row.assigneeUserNameObject.id) ? "yellow" : "none"}}>
+                    {params.row.assigneeUserNameObject.name}
+                </span>
+            )
+        },
+        { field: 'deadline', headerName: 'Deadline', width: 180, valueFormatter: (params) => format(new Date(params.value), 'dd.MM. yyyy') },
+        { field: 'state', headerName: 'State', width: 180,
+            renderCell: (params) => (
+                <span style={{ backgroundColor: getColorForState(params.value) }}>
+                    {params.value}
+                </span>
+            )
+        },
+        {
+          field: 'action',
+          headerName: 'Action',
+          width: 150,
+          renderCell: (params) => (
+            <Button
+                variant="success"
+                size="small"
+                onClick={() => navigate(`/${params.row.projectName ? "task" : "project"}?id=${params.row.id}`)}//${params.row.projectName ? "task" : "project"}
+            >
+                {"Detail "}{params.row.projectName ? "task" : "project"}
+            </Button>
+          ),
+        },
+      ];
+    
 
     return (
         loggedInUser ? 
@@ -35,10 +134,10 @@ function Dashboard() {
                     <Icon path={mdiPlusBoxOutline} size={1} color={"white"} />{" "}
                     New task
                 </Button>
-                <Button variant="success" onClick={() => setShowProjectForm({})} disable={canCreateProject} style={{backgroundColor: canCreateProject ? "#D7FFE4" : null, color: canCreateProject ? "black" : null}}>
+                {canCreateProject && <Button variant="success" onClick={() => setShowProjectForm({})}>
                     <Icon path={mdiPlusBoxOutline} size={1} color={"white"} />{" "}
                     New project
-                </Button>
+                </Button>}
             </div>
             {!!showTaskForm ? (
                 <TaskForm
@@ -49,20 +148,19 @@ function Dashboard() {
             {!!showProjectForm ? (
                 <ProjectForm
                     project={showProjectForm}
-                    setShowEventForm={showProjectForm}
+                    setShowProjectForm={setShowProjectForm}
                 />
             ) : null}
-            {/* {filteredEventList.map((event) => {
-                return (
-                    <EventCard
-                        key={event.id}
-                        event={event}
-                        setShowEventForm={setShowEventForm}
-                        setShowConfirmDeleteDialog={setShowConfirmDeleteDialog}
+            {rows.length > 0 && 
+                <div style={{ height: 750, width: '100%', marginTop:"10px", borderColor: "black", backgroundColor: "#6699CC", borderRadius: "10px" }}>
+                    <DataGrid
+                        rows={rows}
+                        columns={columns}
+                        loading={loading}
+                        getRowId={(row) => row.id} // Specify the unique field for row ID
                     />
-                );
-            })} */}
-            dashboard
+              </div>
+            }
         </Container> : 
         <div style={messageStyle}>
             Nothing here :/ please login

@@ -61,7 +61,7 @@ function TaskForm({ setShowTaskForm, task }) {
       }, []);
 
     return (
-        <Modal show={true} onHide={() => setShowTaskForm(false)}>
+        <Modal show={true} onHide={() => setShowTaskForm(false)} size="lg">
             <Form
                 onSubmit={async (e) => {
                     e.preventDefault();

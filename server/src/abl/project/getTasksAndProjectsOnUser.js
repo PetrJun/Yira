@@ -53,13 +53,14 @@ async function GetTasksAndProjectsOnUserAbl(req, res) {
         for (let i = 0; i < projects.length; i++) {
             for (let a = 0; a < tasks.length; a++) {
                 if (projects[i].id === tasks[a].projectId) {
+                    tasks[a].projectName = projects[i].name;
                     tasksOnUser.push(tasks[a]);
                 }
             }
         }
 
         // concat lists
-        let tasksAndProjects = [...projects, ...tasks];
+        let tasksAndProjects = [...projects, ...tasksOnUser];
 
         // add object, about assigneeUser, to every objects in list
         tasksAndProjects.forEach((element) => {
