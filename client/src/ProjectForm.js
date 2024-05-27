@@ -18,12 +18,12 @@ function ProjectForm({ setShowProjectForm, project }) {
     const { state, handlerMapProject } = useContext(ProjectContext);
     const [showAlert, setShowAlert] = useState(null);
 
-    const [selectedAssigneeUser, setSelectedAssigneeUser] = useState("");
-    const [selectedState, setSelectedState] = useState("");
+    const [selectedAssigneeUser, setSelectedAssigneeUser] = useState(project.assigneeUser || "");
+    const [selectedState, setSelectedState] = useState(project.state || "");
 
     const isPending = state === "pending";
 
-    const [users, setUsers] = useState([]);
+    const [users, setUsers] = useState(project.userList || []);
     const [newUserValue, setNewUserValue] = useState("");
 
     const handleAddUser = () => {
@@ -55,7 +55,6 @@ function ProjectForm({ setShowProjectForm, project }) {
                     var formData = Object.fromEntries(new FormData(e.target));
                     // formData.date = new Date(formData.date).toISOString();
                     try {
-                        formData.createdBy = loggedInUser.id;
                         formData.estimate = parseInt(formData.estimate);
                         formData.worked = formData.worked
                             ? parseInt(formData.worked)
@@ -63,9 +62,9 @@ function ProjectForm({ setShowProjectForm, project }) {
                         formData.assigneeUser = selectedAssigneeUser;
                         formData.userList = users;
                         if (project.id) {
-                            formData.id = project.id;
-                            await handlerMapProject.handleUpdate(formData);
+                            await handlerMapProject.handleUpdate(formData, project.id, loggedInUser.id);
                         } else {
+                            formData.createdBy = loggedInUser.id;
                             await handlerMapProject.handleCreate(formData);
                         }
 
@@ -218,19 +217,19 @@ function ProjectForm({ setShowProjectForm, project }) {
                                 }}
                             >
                                 <option value="">Select state</option>
-                                <option key={1} value={1}>
+                                <option key={1} value={"TODO"}>
                                     TODO
                                 </option>
-                                <option key={2} value={2}>
+                                <option key={2} value={"INPROGRESS"}>
                                     INPROGRESS
                                 </option>
-                                <option key={3} value={3}>
+                                <option key={3} value={"DONE"}>
                                     DONE
                                 </option>
-                                <option key={4} value={4}>
+                                <option key={4} value={"CANCELLED"}>
                                     CANCELLED
                                 </option>
-                                <option key={5} value={5}>
+                                <option key={5} value={"REVIEW"}>
                                     REVIEW
                                 </option>
                             </Form.Select>
@@ -248,9 +247,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                                 name="deadline"
                                 // required
                                 defaultValue={
-                                    project.date
-                                        ? eventDateToInput(project.deadline)
-                                        : undefined
+                                    (project && project.deadline) ? eventDateToInput(project.deadline) : null
                                 }
                             />
                         </Form.Group>
@@ -279,7 +276,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                                 type="number"
                                 name="worked"
                                 // required
-                                defaultValue={parseInt(project.estimate)}
+                                defaultValue={parseInt(project.worked)}
                             />
                         </Form.Group>
                     </Row>
@@ -337,47 +334,12 @@ function pendingStyle() {
     };
 }
 
-function eventDateToInput(date) {
-    date = new Date(date);
+const eventDateToInput = (dateString) => {
+    const date = new Date(dateString);
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
 
 export default ProjectForm;
-
-{
-    /* <Form.Group
-                            as={Col}
-                            className="mb-3"
-                            controlId="formBasicEmail"
-                        >
-                            <Form.Label>State</Form.Label>
-                            <Form.Select
-                                value={selectedState}
-                                onChange={(e) => {
-                                    setSelectedState(e.target.value);
-                                }}
-                            >
-                                <option value="">Select state</option>
-                                <option key={1} value={1}>
-                                    TODO
-                                </option>
-                                <option key={2} value={2}>
-                                    INPROGRESS
-                                </option>
-                                <option key={3} value={3}>
-                                    DONE
-                                </option>
-                                <option key={4} value={4}>
-                                    CANCELLED
-                                </option>
-                                <option key={5} value={5}>
-                                    REVIEW
-                                </option>
-                            </Form.Select>
-                        </Form.Group> */
-}

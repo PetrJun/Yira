@@ -11,7 +11,7 @@ import ProjectForm from "./ProjectForm.js";
 import Container from "react-bootstrap/esm/Container.js";
 
 import Icon from "@mdi/react";
-import { mdiPlusBoxOutline, mdiCheck } from "@mdi/js";
+import { mdiPlusBoxOutline } from "@mdi/js";
 import { DataGrid } from '@mui/x-data-grid';
 import { format } from 'date-fns';
 
@@ -111,7 +111,7 @@ function Dashboard() {
             <Button
                 variant="success"
                 size="small"
-                onClick={() => navigate(`/${params.row.projectName ? "task" : "project"}?id=${params.row.id}`)}//${params.row.projectName ? "task" : "project"}
+                onClick={() => navigate(`/${params.row.projectName ? "task" : "project"}?id=${params.row.id}`)}
             >
                 {"Detail "}{params.row.projectName ? "task" : "project"}
             </Button>
