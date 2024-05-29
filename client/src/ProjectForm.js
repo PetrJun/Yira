@@ -61,6 +61,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                             : 0;
                         formData.assigneeUser = selectedAssigneeUser;
                         formData.userList = users;
+                        formData.state = selectedState;
                         if (project.id) {
                             await handlerMapProject.handleUpdate(formData, project.id, loggedInUser.id);
                         } else {

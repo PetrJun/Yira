@@ -61,7 +61,7 @@ function Dashboard() {
           case 'TODO':
             return 'lightyellow';
           case 'CANCELLED':
-            return 'lightred';
+            return '#FF5733';
           case 'REVIEW':
             return 'lightgray';
           default:

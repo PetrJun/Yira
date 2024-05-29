@@ -2,9 +2,11 @@ import { useContext, useState, useEffect } from "react";
 import { UserContext } from "./UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, Button, Table, Container } from 'react-bootstrap';
-import { mdiFileEditOutline, mdiDeleteCircle } from '@mdi/js';
+import { mdiFileEditOutline, mdiDeleteCircle, mdiPlusCircle  } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import ProjectForm from "./ProjectForm.js";
+import ConfirmDeleteDialogProject from './ConfirmDeleteDialogProject.js'
+import TaskForm from "./TaskForm.js";
 
 
 function ProjectDetail() {
@@ -13,14 +15,15 @@ function ProjectDetail() {
     const navigate = useNavigate();
 
     const [projectInfo, setProjectInfo] = useState({});
-    const [projectWithoutTaskList, setProjectWithoutTaskList] = useState({});
     const [taskList, setTaskList] = useState([]);
     const [showProjectForm, setShowProjectForm] = useState(false);
+    const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
+    const [showTaskForm, setShowTaskForm] = useState(false);
+
+    const projectId = new URLSearchParams(location.search).get("id");
 
     useEffect(() => {
-        fetch(
-            `http://localhost:8000/api/project/get/${new URLSearchParams(location.search).get("id")}`
-        )
+        fetch(`http://localhost:8000/api/project/get/${projectId}`)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
@@ -31,12 +34,8 @@ function ProjectDetail() {
                 setProjectInfo(data);
             })
             .catch((error) => console.log(error));
-    }, [showProjectForm]);
 
-    useEffect(() => {
-        fetch(
-            `http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`
-        )
+        fetch(`http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
@@ -44,16 +43,10 @@ function ProjectDetail() {
                 return response.json();
             })
             .then((data) => {
-                let projectId = new URLSearchParams(location.search).get("id");
-                setProjectWithoutTaskList(projectInfo);
                 setTaskList(data.filter((task) => task.projectId === projectId));
             })
             .catch((error) => console.log(error));
-    }, [projectInfo, loggedInUser]);
-    
-    useEffect(() => {
-        setProjectInfo({...projectInfo, taskList: taskList})
-    }, [taskList]);
+    }, [projectId, loggedInUser.id, showProjectForm]);
 
     const getUserNameById = (id) => {
         const user = userList.find(user => user.id === id);
@@ -63,7 +56,7 @@ function ProjectDetail() {
     return (
         <Container>
             <Card className="mb-3">
-                {projectInfo && 
+                {projectInfo && userList && 
                 <>
                     <Card.Header>{projectInfo.name}</Card.Header>
                     <Card.Body>
@@ -74,8 +67,14 @@ function ProjectDetail() {
                         <strong>Deadline:</strong> {new Date(projectInfo.deadline).toLocaleDateString()}<br />
                         <strong>Estimate:</strong> {projectInfo.estimate} hours<br />
                         <strong>Worked:</strong> {projectInfo.worked} hours<br />
-                        <strong>Description:</strong> {projectInfo.description}<br />
-                        <strong>Created At:</strong> {new Date(projectInfo.createdAt).toLocaleDateString()}
+                        <strong>Created At:</strong> {new Date(projectInfo.createdAt).toLocaleDateString()}<br />
+                        <strong>Project users:</strong> {
+                            userList
+                                .filter(user => projectInfo.userList?.includes(user.id))
+                                .map(user => `${user.name} ${user.surname}`)
+                                .join(', ')
+                        }<br />
+                        <strong>Description:</strong> {projectInfo.description}
                     </Card.Text>
                     </Card.Body>
                 </>
@@ -88,23 +87,41 @@ function ProjectDetail() {
                             gap: "8px",
                         }}
                     >
-                        <Button variant="success" onClick={() => setShowProjectForm({})}>
-                            <Icon path={mdiFileEditOutline} size={1} color={"white"} />{" "}
-                            Edit project
+                        <Button variant="success" onClick={() => setShowTaskForm({})}>
+                            <Icon path={mdiPlusCircle } size={1} color={"white"} />{" "}
+                            Add task
                         </Button>
                         {loggedInUser.id === projectInfo.createdBy && 
-                            <Button variant="danger" onClick={() => setShowProjectForm({})}>
-                                <Icon path={mdiDeleteCircle} size={1} color={"white"} />{" "}
-                                Delete project
-                            </Button>
+                            <>
+                                <Button variant="success" onClick={() => setShowProjectForm({})}>
+                                    <Icon path={mdiFileEditOutline} size={1} color={"white"} />{" "}
+                                    Edit project
+                                </Button>
+                                <Button variant="danger" onClick={() => setShowConfirmDeleteDialog({})}>
+                                    <Icon path={mdiDeleteCircle} size={1} color={"white"} />{" "}
+                                    Delete project
+                                </Button>
+                            </>
                         }
                     </div>
                 </Card.Body>
             </Card>
             {!!showProjectForm ? (
                 <ProjectForm
-                    project={projectWithoutTaskList}
+                    project={projectInfo}
                     setShowProjectForm={setShowProjectForm}
+                />
+            ) : null}
+            {!!showTaskForm ? (
+                <TaskForm
+                    task={{projectId: projectInfo.id}}
+                    setShowTaskForm={setShowTaskForm}
+                />
+            ) : null}
+            {!!showConfirmDeleteDialog ? (
+                <ConfirmDeleteDialogProject
+                    setShowConfirmDeleteDialog={setShowConfirmDeleteDialog}
+                    project={projectInfo}
                 />
             ) : null}
             <Card>
@@ -126,7 +143,7 @@ function ProjectDetail() {
                     </tr>
                     </thead>
                     <tbody>
-                    {projectInfo && projectInfo.taskList && projectInfo.taskList.map(task => (
+                    {taskList.map(task => (
                         <tr key={task.id}>
                             <td>{task.name}</td>
                             <td>{getUserNameById(task.createdBy)}</td>
@@ -157,4 +174,3 @@ function ProjectDetail() {
 }
 
 export default ProjectDetail;
-// backgroundColor: task.assigneeUser === loggedInUser.id ? 'lightyellow' : 'none'

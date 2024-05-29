@@ -58,10 +58,34 @@ function ProjectProvider({ children }) {
     }
   }
 
+  async function handleDelete(projectId, userId) {
+    setProjectObject((current) => ({ ...current, state: "pending" }));
+    const response = await fetch(`http://localhost:8000/api/project/delete/${projectId}/${userId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    });
+    const responseJson = await response.json();
+
+    if (response.status < 400) {
+        setProjectObject((current) => {
+        current.data = responseJson;
+        return { state: "ready", data: current.data };
+      });
+      return responseJson;
+    } else {
+        setProjectObject((current) => {
+        return { state: "error", data: current.data, error: responseJson };
+      });
+      throw new Error(JSON.stringify(responseJson, null, 2));
+    }
+  }
+
   const value = {
     state: projectObject.state,
     project: projectObject.data || [] || {},
-    handlerMapProject: { handleCreate, handleUpdate },
+    handlerMapProject: { handleCreate, handleUpdate, handleDelete },
   };
 
   return (

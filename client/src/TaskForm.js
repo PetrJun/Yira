@@ -18,47 +18,51 @@ function TaskForm({ setShowTaskForm, task }) {
     const { state, handlerMapTask } = useContext(TaskContext);
     const [showAlert, setShowAlert] = useState(null);
 
-    const [selectedProject, setSelectedProject] = useState("");
+    const [selectedProject, setSelectedProject] = useState(task.projectId || "");
     const [availableProjects, setAvailableProjects] = useState([]);
-    const [selectedAssigneeUser, setSelectedAssigneeUser] = useState("");
+    const [selectedAssigneeUser, setSelectedAssigneeUser] = useState(task.assigneeUser || "");
     const [availableAssigneeUsers, setAvailableAssigneeUsers] = useState([]);
 
-    const [selectedState, setSelectedState] = useState("");
+    const [selectedState, setSelectedState] = useState(task.state || "");
 
     const isPending = state === "pending";
 
-    // Kdykoliv se změní vybraná kategorie, aktualizují se dostupné položky
+    // Fetch projects and assignee users on mount
+    useEffect(() => {
+        fetch(`http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const projects = data.filter((x) => !x.projectId);
+                setAvailableProjects(projects);
+
+                // Set initial assignee users if project is pre-selected
+                if (task.projectId) {
+                    const selectedProjectObj = projects.find(item => item.id === task.projectId);
+                    setAvailableAssigneeUsers(selectedProjectObj?.canBeAssignedUsersObjects || []);
+                }
+            })
+            .catch(error => console.log(error));
+    }, [loggedInUser.id, task.projectId]);
+
+    // Update available assignee users when selected project changes
     useEffect(() => {
         if (selectedProject) {
-            const selectedProjectObj = availableProjects.find(
-                (item) => item.id === selectedProject
-            );
-            if (selectedProjectObj) {
-                setAvailableAssigneeUsers(
-                    selectedProjectObj.canBeAssignedUsersObjects || []
-                );
-            } else {
-                setAvailableAssigneeUsers([]);
-            }
+            const selectedProjectObj = availableProjects.find(item => item.id === selectedProject);
+            setAvailableAssigneeUsers(selectedProjectObj?.canBeAssignedUsersObjects || []);
         } else {
             setAvailableAssigneeUsers([]);
         }
-        setSelectedAssigneeUser(""); // Reset druhého comboboxu
-    }, [selectedProject, availableProjects]);
-
-    useEffect(() => {
-        fetch(`http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json();
-          })
-          .then(data => {
-            setAvailableProjects(data.filter((x) => !x.projectId));
-          })
-          .catch(error => console.log(error));
-      }, []);
+        if (task.projectId === selectedProject) {
+            setSelectedAssigneeUser(task.assigneeUser);
+        } else {
+            setSelectedAssigneeUser("");
+        }
+    }, [selectedProject, availableProjects, task.assigneeUser]);
 
     return (
         <Modal show={true} onHide={() => setShowTaskForm(false)} size="lg">
@@ -69,15 +73,15 @@ function TaskForm({ setShowTaskForm, task }) {
                     var formData = Object.fromEntries(new FormData(e.target));
                     // formData.date = new Date(formData.date).toISOString();
                     try {
-                        formData.createdBy = loggedInUser.id;
                         formData.estimate = parseInt(formData.estimate);
                         formData.worked = formData.worked ? parseInt(formData.worked) : 0;
                         formData.projectId = selectedProject;
                         formData.assigneeUser = selectedAssigneeUser;
+                        formData.state = selectedState;
                         if (task.id) {
-                            formData.id = task.id;
-                            await handlerMapTask.handleUpdate(formData);
+                            await handlerMapTask.handleUpdate(formData, task.id, loggedInUser.id);
                         } else {
+                            formData.createdBy = loggedInUser.id;
                             await handlerMapTask.handleCreate(formData);
                         }
 
@@ -160,9 +164,7 @@ function TaskForm({ setShowTaskForm, task }) {
                                 name="deadline"
                                 // required
                                 defaultValue={
-                                    task.date
-                                        ? eventDateToInput(task.deadline)
-                                        : undefined
+                                    (task && task.deadline) ? eventDateToInput(task.deadline) : null
                                 }
                             />
                         </Form.Group>
@@ -202,19 +204,19 @@ function TaskForm({ setShowTaskForm, task }) {
                                 }}
                             >
                                 <option value="">Select state</option>
-                                <option key={1} value={1}>
+                                <option key={1} value={"TODO"}>
                                     TODO
                                 </option>
-                                <option key={2} value={2}>
+                                <option key={2} value={"INPROGRESS"}>
                                     INPROGRESS
                                 </option>
-                                <option key={3} value={3}>
+                                <option key={3} value={"DONE"}>
                                     DONE
                                 </option>
-                                <option key={4} value={4}>
+                                <option key={4} value={"CANCELLED"}>
                                     CANCELLED
                                 </option>
-                                <option key={5} value={5}>
+                                <option key={5} value={"REVIEW"}>
                                     REVIEW
                                 </option>
                             </Form.Select>
@@ -244,7 +246,7 @@ function TaskForm({ setShowTaskForm, task }) {
                                 type="number"
                                 name="worked"
                                 // required
-                                defaultValue={parseInt(task.estimate)}
+                                defaultValue={parseInt(task.worked)}
                             />
                         </Form.Group>
                     </Row>
@@ -302,14 +304,12 @@ function pendingStyle() {
     };
 }
 
-function eventDateToInput(date) {
-    date = new Date(date);
+const eventDateToInput = (dateString) => {
+    const date = new Date(dateString);
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
 
 export default TaskForm;
