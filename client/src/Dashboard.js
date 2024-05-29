@@ -170,19 +170,38 @@ function Dashboard() {
             headerName: "Assignee user",
             width: 200,
             renderCell: (params) => (
-                !params.row.projectId ?
+                !params.row.projectId && loggedInUser?.id === params.row.assigneeUserNameObject.id ?
                 <span
                     style={{
-                        backgroundColor:
-                            loggedInUser &&
-                            loggedInUser.id ===
-                                params.row.assigneeUserNameObject.id
-                                ? "yellow"
-                                : "none",
+                        backgroundColor:"yellow"
+                    }}
+                >
+                    {params.row.assigneeUserNameObject.name}
+                </span> : 
+                !params.row.projectId && loggedInUser?.id !== params.row.assigneeUserNameObject.id ? 
+                <span
+                    style={{
+                        backgroundColor:"none"
                     }}
                 >
                     {params.row.assigneeUserNameObject.name}
                 </span> :
+                (loggedInUser?.id === params.row.assigneeUserNameObject.id) ?
+                <DropdownButton
+                    as={ButtonGroup}
+                    key={0}
+                    id={`dropdown-variants-warning`}
+                    size="sm"
+                    variant="warning"
+                    title={params.row.assigneeUserNameObject.name}
+                    style={{
+                        position: "absolute",
+                    }}
+                >
+                    {params.row.canBeAssignedUsersObjects.map((user) => (
+                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdate(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
+                    ))}
+                </DropdownButton> :
                 <DropdownButton
                     as={ButtonGroup}
                     key={0}
