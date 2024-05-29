@@ -46,7 +46,7 @@ function ProjectDetail() {
                 setTaskList(data.filter((task) => task.projectId === projectId));
             })
             .catch((error) => console.log(error));
-    }, [projectId, loggedInUser.id, showProjectForm]);
+    }, [projectId, loggedInUser.id, showProjectForm, showTaskForm]);
 
     const getUserNameById = (id) => {
         const user = userList.find(user => user.id === id);
