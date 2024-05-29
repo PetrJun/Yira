@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import { TasksAndProjectsOnUserContext } from "./TasksAndProjectsOnUserContext.js";
 import { UserContext } from "./UserContext.js";
+import { TaskContext } from "./TaskContext.js";
 
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 
@@ -14,10 +15,14 @@ import Icon from "@mdi/react";
 import { mdiPlusBoxOutline } from "@mdi/js";
 import { DataGrid } from "@mui/x-data-grid";
 import { format } from "date-fns";
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 function Dashboard() {
     // const { tasksAndProjectsOnUser } = useContext(TasksAndProjectsOnUserContext);
     const { loggedInUser } = useContext(UserContext);
+    const { handlerMapTask } = useContext(TaskContext);
     const navigate = useNavigate();
 
     const [showTaskForm, setShowTaskForm] = useState(false);
@@ -30,6 +35,16 @@ function Dashboard() {
     const [lastShiftPressTime, setLastShiftPressTime] = useState(null);
     const [ctrlPressed, setCtrlPressed] = useState(false);
     const [lastCtrlPressTime, setLastCtrlPressTime] = useState(null);
+    const [assigneeUserChanged, setAssigneeUserChanged] = useState(false);
+
+    const handleUpdate = async (taskId, assigneeUserId, userId) => {
+        try {
+          await handlerMapTask.handleUpdateAssigneeUser(taskId, assigneeUserId, userId);
+          setAssigneeUserChanged(true);
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     const tooltipTask = (
         <Tooltip id="tooltipTask">
@@ -45,6 +60,7 @@ function Dashboard() {
 
     const handleKeyDown = (event) => {
         if (event.key === "Shift") {
+            console.log("Shift pressed: " + shiftPressed);
             setShiftPressed(true);
             const currentTime = new Date().getTime();
             if (lastShiftPressTime && currentTime - lastShiftPressTime < 2000) {
@@ -52,6 +68,7 @@ function Dashboard() {
             }
             setLastShiftPressTime(currentTime);
         } else if (event.key === "Control" && canCreateProject) {
+            console.log("Control pressed: " + ctrlPressed);
             setCtrlPressed(true);
             const currentTime = new Date().getTime();
             if (lastCtrlPressTime && currentTime - lastCtrlPressTime < 2000) {
@@ -104,7 +121,8 @@ function Dashboard() {
                 })
                 .catch((error) => console.log(error));
         }
-    }, [loggedInUser]);
+        setAssigneeUserChanged(false);
+    }, [loggedInUser, assigneeUserChanged]);
 
     const getColorForState = (state) => {
         switch (state) {
@@ -122,6 +140,7 @@ function Dashboard() {
                 return "none";
         }
     };
+
 
     const columns = [
         { field: "name", headerName: "Name", width: 400 },
@@ -151,6 +170,7 @@ function Dashboard() {
             headerName: "Assignee user",
             width: 200,
             renderCell: (params) => (
+                !params.row.projectId ?
                 <span
                     style={{
                         backgroundColor:
@@ -162,7 +182,22 @@ function Dashboard() {
                     }}
                 >
                     {params.row.assigneeUserNameObject.name}
-                </span>
+                </span> :
+                <DropdownButton
+                    as={ButtonGroup}
+                    key={0}
+                    id={`dropdown-button-drop-0`}
+                    size="sm"
+                    variant="secondary"
+                    title={params.row.assigneeUserNameObject.name}
+                    style={{
+                        position: "absolute",
+                    }}
+                >
+                    {params.row.canBeAssignedUsersObjects.map((user) => (
+                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdate(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
+                    ))}
+                </DropdownButton>
             ),
         },
         {
