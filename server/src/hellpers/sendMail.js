@@ -39,6 +39,10 @@ const updateTaskAssigneeUserNotfication = path.join(
     __dirname,
     "../templates/updateTaskAssigneeUserNotfication.html"
 );
+const updateProjectAssigneeUserNotfication = path.join(
+    __dirname,
+    "../templates/updateProjectAssigneeUserNotfication.html"
+);
 
 // email from
 const transporter = nodemailer.createTransport({
@@ -116,6 +120,9 @@ function createEmailTemplate(template) {
             break;
         case "updateTaskAssigneeUserNotfication":
             emailTemplate = updateTaskAssigneeUserNotfication;
+            break;
+        case "updateProjectAssigneeUserNotfication":
+            emailTemplate = updateProjectAssigneeUserNotfication;
             break;
     }
 
@@ -198,6 +205,12 @@ function createDataForMailDistribution(sendReq, template, data) {
             .replace("{{recipient}}", recipient)
             .replace("{{taskName}}", taskName)
             .replace("{{taskId}}", taskId);
+        subject = "Nove prirazeny uzivatel";
+    } else if (template == "updateProjectAssigneeUserNotfication") {
+        htmlTemplate = data
+            .replace("{{recipient}}", recipient)
+            .replace("{{projectName}}", projectName)
+            .replace("{{projectId}}", projectId);
         subject = "Nove prirazeny uzivatel";
     }
 

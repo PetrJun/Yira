@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 // import { TasksAndProjectsOnUserContext } from "./TasksAndProjectsOnUserContext.js";
 import { UserContext } from "./UserContext.js";
 import { TaskContext } from "./TaskContext.js";
+import { ProjectContext } from "./ProjectContext.js";
 
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 
@@ -23,6 +24,7 @@ function Dashboard() {
     // const { tasksAndProjectsOnUser } = useContext(TasksAndProjectsOnUserContext);
     const { loggedInUser } = useContext(UserContext);
     const { handlerMapTask } = useContext(TaskContext);
+    const { handlerMapProject } = useContext(ProjectContext);
     const navigate = useNavigate();
 
     const [showTaskForm, setShowTaskForm] = useState(false);
@@ -35,12 +37,21 @@ function Dashboard() {
     const [lastShiftPressTime, setLastShiftPressTime] = useState(null);
     const [ctrlPressed, setCtrlPressed] = useState(false);
     const [lastCtrlPressTime, setLastCtrlPressTime] = useState(null);
-    const [assigneeUserChanged, setAssigneeUserChanged] = useState(false);
+    const [assigneeUserTaskChanged, setAssigneeUserTaskChanged] = useState(false);
+    const [assigneeUserProjectChanged, setAssigneeUserProjectChanged] = useState(false);
 
-    const handleUpdate = async (taskId, assigneeUserId, userId) => {
+    const handleUpdateTask = async (taskId, assigneeUserId, userId) => {
         try {
           await handlerMapTask.handleUpdateAssigneeUser(taskId, assigneeUserId, userId);
-          setAssigneeUserChanged(true);
+          setAssigneeUserTaskChanged(true);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+    const handleUpdateProject = async (projectId, assigneeUserId, userId) => {
+        try {
+          await handlerMapProject.handleUpdateAssigneeUser(projectId, assigneeUserId, userId);
+          setAssigneeUserProjectChanged(true);
         } catch (e) {
             console.error(e);
         }
@@ -121,8 +132,9 @@ function Dashboard() {
                 })
                 .catch((error) => console.log(error));
         }
-        setAssigneeUserChanged(false);
-    }, [loggedInUser, assigneeUserChanged]);
+        setAssigneeUserTaskChanged(false);
+        setAssigneeUserProjectChanged(false);
+    }, [loggedInUser, assigneeUserTaskChanged, assigneeUserProjectChanged]);
 
     const getColorForState = (state) => {
         switch (state) {
@@ -137,7 +149,7 @@ function Dashboard() {
             case "REVIEW":
                 return "lightgray";
             default:
-                return "none";
+                return "white";
         }
     };
 
@@ -170,22 +182,42 @@ function Dashboard() {
             headerName: "Assignee user",
             width: 200,
             renderCell: (params) => (
+                !params.row.projectId && loggedInUser?.id === params.row.assigneeUserNameObject.id && loggedInUser?.id === params.row.createdBy ?
+                <DropdownButton
+                    as={ButtonGroup}
+                    key={0}
+                    id={`dropdown-variants-warning`}
+                    size="sm"
+                    variant="warning"
+                    title={params.row.assigneeUserNameObject.name}
+                    style={{
+                        position: "absolute",
+                    }}
+                >
+                    {params.row.canBeAssignedUsersObjects.map((user) => (
+                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdateProject(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
+                    ))}
+                </DropdownButton> : 
+                !params.row.projectId && loggedInUser?.id !== params.row.assigneeUserNameObject.id && loggedInUser?.id === params.row.createdBy ? 
+                <DropdownButton
+                    as={ButtonGroup}
+                    key={0}
+                    id={`dropdown-button-drop-0`}
+                    size="sm"
+                    variant="secondary"
+                    title={params.row.assigneeUserNameObject.name}
+                    style={{
+                        position: "absolute",
+                    }}
+                >
+                    {params.row.canBeAssignedUsersObjects.map((user) => (
+                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdateProject(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
+                    ))}
+                </DropdownButton> :
                 !params.row.projectId && loggedInUser?.id === params.row.assigneeUserNameObject.id ?
-                <span
-                    style={{
-                        backgroundColor:"yellow"
-                    }}
-                >
-                    {params.row.assigneeUserNameObject.name}
-                </span> : 
+                <span style={{backgroundColor:"yellow", padding: "5px 5px 5px 5px"}}>{params.row.assigneeUserNameObject.name}</span> :
                 !params.row.projectId && loggedInUser?.id !== params.row.assigneeUserNameObject.id ? 
-                <span
-                    style={{
-                        backgroundColor:"none"
-                    }}
-                >
-                    {params.row.assigneeUserNameObject.name}
-                </span> :
+                <span>{params.row.assigneeUserNameObject.name}</span> :
                 (loggedInUser?.id === params.row.assigneeUserNameObject.id) ?
                 <DropdownButton
                     as={ButtonGroup}
@@ -199,7 +231,7 @@ function Dashboard() {
                     }}
                 >
                     {params.row.canBeAssignedUsersObjects.map((user) => (
-                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdate(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
+                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdateTask(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
                     ))}
                 </DropdownButton> :
                 <DropdownButton
@@ -214,7 +246,7 @@ function Dashboard() {
                     }}
                 >
                     {params.row.canBeAssignedUsersObjects.map((user) => (
-                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdate(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
+                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdateTask(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
                     ))}
                 </DropdownButton>
             ),
@@ -320,6 +352,10 @@ function Dashboard() {
                         columns={columns}
                         loading={loading}
                         getRowId={(row) => row.id} // Specify the unique field for row ID
+                        pageSizeOptions={[12, 25, 50, 100]}
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 12 } },
+                        }}
                     />
                 </div>
             )}
