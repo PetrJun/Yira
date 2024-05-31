@@ -14,11 +14,11 @@ import Container from "react-bootstrap/esm/Container.js";
 
 import Icon from "@mdi/react";
 import { mdiPlusBoxOutline } from "@mdi/js";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGridPro } from "@mui/x-data-grid-pro";
 import { format } from "date-fns";
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Dropdown from "react-bootstrap/Dropdown";
+import DropdownButton from "react-bootstrap/DropdownButton";
 
 function Dashboard() {
     // const { tasksAndProjectsOnUser } = useContext(TasksAndProjectsOnUserContext);
@@ -37,21 +37,31 @@ function Dashboard() {
     const [lastShiftPressTime, setLastShiftPressTime] = useState(null);
     const [ctrlPressed, setCtrlPressed] = useState(false);
     const [lastCtrlPressTime, setLastCtrlPressTime] = useState(null);
-    const [assigneeUserTaskChanged, setAssigneeUserTaskChanged] = useState(false);
-    const [assigneeUserProjectChanged, setAssigneeUserProjectChanged] = useState(false);
+    const [assigneeUserTaskChanged, setAssigneeUserTaskChanged] =
+        useState(false);
+    const [assigneeUserProjectChanged, setAssigneeUserProjectChanged] =
+        useState(false);
 
     const handleUpdateTask = async (taskId, assigneeUserId, userId) => {
         try {
-          await handlerMapTask.handleUpdateAssigneeUser(taskId, assigneeUserId, userId);
-          setAssigneeUserTaskChanged(true);
+            await handlerMapTask.handleUpdateAssigneeUser(
+                taskId,
+                assigneeUserId,
+                userId
+            );
+            setAssigneeUserTaskChanged(true);
         } catch (e) {
             console.error(e);
         }
     };
     const handleUpdateProject = async (projectId, assigneeUserId, userId) => {
         try {
-          await handlerMapProject.handleUpdateAssigneeUser(projectId, assigneeUserId, userId);
-          setAssigneeUserProjectChanged(true);
+            await handlerMapProject.handleUpdateAssigneeUser(
+                projectId,
+                assigneeUserId,
+                userId
+            );
+            setAssigneeUserProjectChanged(true);
         } catch (e) {
             console.error(e);
         }
@@ -127,6 +137,23 @@ function Dashboard() {
                     return response.json();
                 })
                 .then((data) => {
+                    console.log(data);
+                    data = data.map((item) => {
+                        if (item.projectId) {
+                            return {
+                                ...item,
+                                hierarchy: [item.projectName, item.name],
+                            };
+                        } else {
+                            return {
+                                ...item,
+                                hierarchy: [item.name],
+                            };
+                        }
+                    });
+                    console.log(data);
+                    data = modifyHierarchy(data);
+                    console.log(data);
                     setRows(data);
                     setLoading(false);
                 })
@@ -153,9 +180,8 @@ function Dashboard() {
         }
     };
 
-
     const columns = [
-        { field: "name", headerName: "Name", width: 400 },
+        { field: "name", headerName: "Name", width: 200 },
         {
             field: "projectName",
             headerName: "Project name",
@@ -168,7 +194,7 @@ function Dashboard() {
                             size="small"
                             onClick={() =>
                                 navigate(`/project?id=${params.row.projectId}`)
-                            } //
+                            }
                         >
                             {params.row.projectName}
                         </Button>
@@ -181,82 +207,147 @@ function Dashboard() {
             field: "assigneeUserObject",
             headerName: "Assignee user",
             width: 200,
-            renderCell: (params) => (
-                !params.row.projectId && loggedInUser?.id === params.row.assigneeUserNameObject.id && loggedInUser?.id === params.row.createdBy ?
-                <DropdownButton
-                    as={ButtonGroup}
-                    key={0}
-                    id={`dropdown-variants-warning`}
-                    size="sm"
-                    variant="warning"
-                    title={params.row.assigneeUserNameObject.name}
-                    style={{
-                        position: "absolute",
-                    }}
-                >
-                    {params.row.canBeAssignedUsersObjects.map((user) => (
-                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdateProject(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
-                    ))}
-                </DropdownButton> : 
-                !params.row.projectId && loggedInUser?.id !== params.row.assigneeUserNameObject.id && loggedInUser?.id === params.row.createdBy ? 
-                <DropdownButton
-                    as={ButtonGroup}
-                    key={0}
-                    id={`dropdown-button-drop-0`}
-                    size="sm"
-                    variant="secondary"
-                    title={params.row.assigneeUserNameObject.name}
-                    style={{
-                        position: "absolute",
-                    }}
-                >
-                    {params.row.canBeAssignedUsersObjects.map((user) => (
-                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdateProject(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
-                    ))}
-                </DropdownButton> :
-                !params.row.projectId && loggedInUser?.id === params.row.assigneeUserNameObject.id ?
-                <span style={{backgroundColor:"yellow", padding: "5px 5px 5px 5px"}}>{params.row.assigneeUserNameObject.name}</span> :
-                !params.row.projectId && loggedInUser?.id !== params.row.assigneeUserNameObject.id ? 
-                <span>{params.row.assigneeUserNameObject.name}</span> :
-                (loggedInUser?.id === params.row.assigneeUserNameObject.id) ?
-                <DropdownButton
-                    as={ButtonGroup}
-                    key={0}
-                    id={`dropdown-variants-warning`}
-                    size="sm"
-                    variant="warning"
-                    title={params.row.assigneeUserNameObject.name}
-                    style={{
-                        position: "absolute",
-                    }}
-                >
-                    {params.row.canBeAssignedUsersObjects.map((user) => (
-                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdateTask(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
-                    ))}
-                </DropdownButton> :
-                <DropdownButton
-                    as={ButtonGroup}
-                    key={0}
-                    id={`dropdown-button-drop-0`}
-                    size="sm"
-                    variant="secondary"
-                    title={params.row.assigneeUserNameObject.name}
-                    style={{
-                        position: "absolute",
-                    }}
-                >
-                    {params.row.canBeAssignedUsersObjects.map((user) => (
-                        <Dropdown.Item eventKey={user.id} onClick={() => handleUpdateTask(params.row.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
-                    ))}
-                </DropdownButton>
-            ),
+            renderCell: (params) =>
+                !params.row.projectId &&
+                loggedInUser?.id === params.row.assigneeUserNameObject.id &&
+                loggedInUser?.id === params.row.createdBy ? (
+                    <DropdownButton
+                        as={ButtonGroup}
+                        key={0}
+                        id={`dropdown-variants-warning`}
+                        size="sm"
+                        variant="warning"
+                        title={params.row.assigneeUserNameObject.name}
+                        style={{
+                            position: "absolute",
+                            marginTop: "5px"
+                        }}
+                    >
+                        {params.row.canBeAssignedUsersObjects.map((user) => (
+                            <Dropdown.Item
+                                eventKey={user.id}
+                                onClick={() =>
+                                    handleUpdateProject(
+                                        params.row.id,
+                                        user.id,
+                                        loggedInUser.id
+                                    )
+                                }
+                            >
+                                {user.name}
+                            </Dropdown.Item>
+                        ))}
+                    </DropdownButton>
+                ) : !params.row.projectId &&
+                  loggedInUser?.id !== params.row.assigneeUserNameObject.id &&
+                  loggedInUser?.id === params.row.createdBy ? (
+                    <DropdownButton
+                        as={ButtonGroup}
+                        key={0}
+                        id={`dropdown-button-drop-0`}
+                        size="sm"
+                        variant="secondary"
+                        title={params.row.assigneeUserNameObject.name}
+                        style={{
+                            position: "absolute",
+                            marginTop: "5px"
+                        }}
+                    >
+                        {params.row.canBeAssignedUsersObjects.map((user) => (
+                            <Dropdown.Item
+                                eventKey={user.id}
+                                onClick={() =>
+                                    handleUpdateProject(
+                                        params.row.id,
+                                        user.id,
+                                        loggedInUser.id
+                                    )
+                                }
+                            >
+                                {user.name}
+                            </Dropdown.Item>
+                        ))}
+                    </DropdownButton>
+                ) : !params.row.projectId &&
+                  loggedInUser?.id === params.row.assigneeUserNameObject.id ? (
+                    <span
+                        style={{
+                            backgroundColor: "yellow",
+                            padding: "5px 5px 5px 5px",
+                            marginTop: "5px"
+                        }}
+                    >
+                        {params.row.assigneeUserNameObject.name}
+                    </span>
+                ) : !params.row.projectId &&
+                  loggedInUser?.id !== params.row.assigneeUserNameObject.id ? (
+                    <span>{params.row.assigneeUserNameObject.name}</span>
+                ) : loggedInUser?.id ===
+                  params.row.assigneeUserNameObject.id ? (
+                    <DropdownButton
+                        as={ButtonGroup}
+                        key={0}
+                        id={`dropdown-variants-warning`}
+                        size="sm"
+                        variant="warning"
+                        title={params.row.assigneeUserNameObject.name}
+                        style={{
+                            position: "absolute",
+                            marginTop: "5px"
+                        }}
+                    >
+                        {params.row.canBeAssignedUsersObjects.map((user) => (
+                            <Dropdown.Item
+                                eventKey={user.id}
+                                onClick={() =>
+                                    handleUpdateTask(
+                                        params.row.id,
+                                        user.id,
+                                        loggedInUser.id
+                                    )
+                                }
+                            >
+                                {user.name}
+                            </Dropdown.Item>
+                        ))}
+                    </DropdownButton>
+                ) : (
+                    <DropdownButton
+                        as={ButtonGroup}
+                        key={0}
+                        id={`dropdown-button-drop-0`}
+                        size="sm"
+                        variant="secondary"
+                        title={params.row.assigneeUserNameObject.name}
+                        style={{
+                            position: "absolute",
+                            marginTop: "5px"
+                        }}
+                    >
+                        {params.row.canBeAssignedUsersObjects.map((user) => (
+                            <Dropdown.Item
+                                eventKey={user.id}
+                                onClick={() =>
+                                    handleUpdateTask(
+                                        params.row.id,
+                                        user.id,
+                                        loggedInUser.id
+                                    )
+                                }
+                            >
+                                {user.name}
+                            </Dropdown.Item>
+                        ))}
+                    </DropdownButton>
+                ),
         },
         {
             field: "deadline",
             headerName: "Deadline",
             width: 180,
-            valueFormatter: (params) =>
-                format(new Date(params.value), "dd.MM. yyyy"),
+            valueFormatter: (params) => {
+                return format(new Date(params), "dd.MM. yyyy");
+            },
         },
         {
             field: "state",
@@ -293,6 +384,8 @@ function Dashboard() {
         },
     ];
 
+    const getTreeDataPath = (row) => row.hierarchy;
+
     return loggedInUser ? (
         <Container>
             <div
@@ -303,8 +396,15 @@ function Dashboard() {
                 }}
             >
                 <OverlayTrigger placement="top" overlay={tooltipTask}>
-                    <Button variant="success" onClick={() => setShowTaskForm({})}>
-                        <Icon path={mdiPlusBoxOutline} size={1} color={"white"} />{" "}
+                    <Button
+                        variant="success"
+                        onClick={() => setShowTaskForm({})}
+                    >
+                        <Icon
+                            path={mdiPlusBoxOutline}
+                            size={1}
+                            color={"white"}
+                        />{" "}
                         New task
                     </Button>
                 </OverlayTrigger>
@@ -347,7 +447,8 @@ function Dashboard() {
                         borderRadius: "10px",
                     }}
                 >
-                    <DataGrid
+                    <DataGridPro
+                        treeData
                         rows={rows}
                         columns={columns}
                         loading={loading}
@@ -356,6 +457,7 @@ function Dashboard() {
                         initialState={{
                             pagination: { paginationModel: { pageSize: 12 } },
                         }}
+                        getTreeDataPath={getTreeDataPath}
                     />
                 </div>
             )}
@@ -377,5 +479,29 @@ const messageStyle = {
     margin: "0",
     backgroundColor: "#f0f0f0",
 };
+
+function modifyHierarchy(list) {
+    let nameCounts = {};
+
+    for (let i = 0; i < list.length; i++) {
+        let name = list[i].name;
+
+        if (name in nameCounts) {
+            nameCounts[name]++;
+        } else {
+            nameCounts[name] = 1;
+        }
+
+        if (nameCounts[name] > 1) {
+            if (list[i].projectId) {
+                list[i].hierarchy[1] = name + ` (${nameCounts[name]})`;
+            } else {
+                list[i].hierarchy[0] = name + ` (${nameCounts[name]})`;
+            }
+        }
+    }
+
+    return list;
+}
 
 export default Dashboard;
