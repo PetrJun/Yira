@@ -3,9 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import CloseButton from "react-bootstrap/CloseButton";
 import Alert from "react-bootstrap/Alert";
-
 import { UserContext } from "./UserContext.js";
-
 import Icon from "@mdi/react";
 import { mdiLoading } from "@mdi/js";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +29,7 @@ function ConfirmDeleteDialogTask({ setShowConfirmDeleteDialog, task }) {
           dismissible
           onClose={() => setShowAlert(null)}
         >
-          <Alert.Heading>Nepodařilo se vytvořit task</Alert.Heading>
+          <Alert.Heading>Failed to create task</Alert.Heading>
           <pre>{showAlert}</pre>
         </Alert>
         {isPending ? (
@@ -39,7 +37,7 @@ function ConfirmDeleteDialogTask({ setShowConfirmDeleteDialog, task }) {
             <Icon path={mdiLoading} size={2} spin />
           </div>
         ) : null}
-        Opravdu chcete smazat task: {task.name}?
+        Do you really want to delete the task: {task.name}?
       </Modal.Body>
       <Modal.Footer>
         <Button

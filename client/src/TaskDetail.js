@@ -36,32 +36,34 @@ function TaskDetail() {
     };
 
     useEffect(() => {
-        fetch(`http://localhost:8000/api/task/get/${taskId}`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then((data) => {
-                setTaskInfo(data);
-                fetch(`http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`)
-                    .then((response) => {
-                        if (!response.ok) {
-                            throw new Error("Network response was not ok");
-                        }
-                        return response.json();
-                    })
-                    .then((data2) => {
-                        setProjectName(data2.filter(project => project.id === data.projectId)[0].name);
-                        const selectedProjectObj = data2.find(item => item.id === data.projectId);
-                        setAssigneeUsers(selectedProjectObj?.canBeAssignedUsersObjects);
-                    })
-                    .catch((error) => console.log(error));
-            })
-            .catch((error) => console.log(error));
+        if(loggedInUser?.id){
+            fetch(`http://localhost:8000/api/task/get/${taskId}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    setTaskInfo(data);
+                    fetch(`http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`)
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+                            }
+                            return response.json();
+                        })
+                        .then((data2) => {
+                            setProjectName(data2.filter(project => project.id === data.projectId)[0].name);
+                            const selectedProjectObj = data2.find(item => item.id === data.projectId);
+                            setAssigneeUsers(selectedProjectObj?.canBeAssignedUsersObjects);
+                        })
+                        .catch((error) => console.log(error));
+                })
+                .catch((error) => console.log(error));
             setAssigneeUserChanged(false);
-    }, [taskId, loggedInUser.id, showTaskForm, assigneeUserChanged]);
+        }
+    }, [taskId, loggedInUser, showTaskForm, assigneeUserChanged]);
 
     const getUserNameById = (id) => {
         const user = userList.find(user => user.id === id);
@@ -69,7 +71,7 @@ function TaskDetail() {
     };
 
     return (
-        <Container>
+        loggedInUser?.id && assigneeUsers?.some(item => item.id === loggedInUser.id) ? (<Container>
             <Card className="mb-3">
                 {taskInfo && userList && 
                 <>
@@ -86,13 +88,13 @@ function TaskDetail() {
                             title={getUserNameById(taskInfo.assigneeUser)}
                         >
                             {assigneeUsers.map((user) => (
-                                <Dropdown.Item eventKey={user.id} onClick={() => handleUpdate(taskInfo.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
+                                <Dropdown.Item key={user.id} eventKey={user.id} onClick={() => handleUpdate(taskInfo.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
                             ))}
                         </DropdownButton><br />
                         <strong>State:</strong> {taskInfo.state}<br />
                         <strong>Deadline:</strong> {new Date(taskInfo.deadline).toLocaleDateString()}<br />
                         <strong>Estimate:</strong> {taskInfo.estimate} hours<br />
-                        <strong>Worked:</strong> {taskInfo.worked} hours<br />
+                        <strong>Worked:</strong> {taskInfo.worked ? taskInfo.worked : 0} hours<br />
                         <strong>Created At:</strong> {new Date(taskInfo.createdAt).toLocaleDateString()}<br />
                         <strong>Project:</strong>
                             <Button onClick={() => navigate(`/project?id=${taskInfo.projectId}`)} style={{marginLeft: "5px"}}>
@@ -134,8 +136,23 @@ function TaskDetail() {
                     task={taskInfo}
                 />
             ) : null}
-        </Container>
+        </Container>) : (
+            <div style={messageStyle}>Nothing here :/ please login</div>
+        )
     );
 }
+
+const messageStyle = {
+    color: "red",
+    fontSize: "3em",
+    fontWeight: "bold",
+    textAlign: "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "80vh",
+    margin: "0",
+    backgroundColor: "#f0f0f0",
+};
 
 export default TaskDetail;

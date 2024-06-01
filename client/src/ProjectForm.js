@@ -1,5 +1,4 @@
 import { useContext, useState, useEffect } from "react";
-
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import CloseButton from "react-bootstrap/CloseButton";
@@ -7,9 +6,8 @@ import Form from "react-bootstrap/Form";
 import Alert from "react-bootstrap/Alert";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-
 import Icon from "@mdi/react";
-import { mdiLoading } from "@mdi/js";
+import { mdiLoading, mdiDeleteCircle, mdiPlusCircle } from "@mdi/js";
 import { UserContext } from "./UserContext.js";
 import { ProjectContext } from "./ProjectContext.js";
 
@@ -17,12 +15,9 @@ function ProjectForm({ setShowProjectForm, project }) {
     const { userList, loggedInUser } = useContext(UserContext);
     const { state, handlerMapProject } = useContext(ProjectContext);
     const [showAlert, setShowAlert] = useState(null);
-
     const [selectedAssigneeUser, setSelectedAssigneeUser] = useState(project.assigneeUser || "");
     const [selectedState, setSelectedState] = useState(project.state || "");
-
     const isPending = state === "pending";
-
     const [users, setUsers] = useState(project.userList || []);
     const [newUserValue, setNewUserValue] = useState("");
 
@@ -90,7 +85,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                         onClose={() => setShowAlert(null)}
                     >
                         <Alert.Heading>
-                            Nepodařilo se vytvořit project
+                            Failed to create a project
                         </Alert.Heading>
                         <pre>{showAlert}</pre>
                     </Alert>
@@ -146,14 +141,15 @@ function ProjectForm({ setShowProjectForm, project }) {
                             controlId="formBasicEmail"
                         >
                             <Button variant="primary" onClick={handleAddUser}>
+                                <Icon path={mdiPlusCircle } size={1} color={"white"} />{" "}
                                 Add user
                             </Button>
                         </Form.Group>
                         {userList
                             .filter((user) => users.includes(user.id))
                             .map((user) => (
-                                <Row className="mb-3">
-                                    <Col md={8}>
+                                <Row className="mb-3" key={user.id}>
+                                    <Col md={8} key={user.id}>
                                         <p
                                             key={user.id}
                                             style={{
@@ -166,7 +162,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                                             </b>
                                         </p>
                                     </Col>
-                                    <Col md={4}>
+                                    <Col md={4} key={user.id + "123"}>
                                         <Button
                                             variant="danger"
                                             onClick={() =>
@@ -174,6 +170,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                                             }
                                             style={{ display: "flex" }}
                                         >
+                                            <Icon path={mdiDeleteCircle} size={1} color={"white"} />{" "}
                                             Delete
                                         </Button>
                                     </Col>
@@ -190,7 +187,6 @@ function ProjectForm({ setShowProjectForm, project }) {
                             <Form.Select
                                 value={selectedAssigneeUser}
                                 onChange={(e) => {
-                                    console.log(e.target.value);
                                     setSelectedAssigneeUser(e.target.value);
                                 }}
                             >
@@ -305,14 +301,14 @@ function ProjectForm({ setShowProjectForm, project }) {
                         onClick={() => setShowProjectForm(false)}
                         disabled={isPending}
                     >
-                        Zavřít
+                        Close
                     </Button>
                     <Button
                         type="submit"
                         variant="primary"
                         disabled={isPending}
                     >
-                        {project.id ? "Upravit" : "Vytvořit"}
+                        {project.id ? "Edit" : "Create"}
                     </Button>
                 </Modal.Footer>
             </Form>

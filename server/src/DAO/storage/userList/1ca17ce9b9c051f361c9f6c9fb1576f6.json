@@ -1,1 +1,7 @@
-{"name":"Jan","surname":"Fiala","email":"test@seznam.cz","role":"teamMember","id":"1ca17ce9b9c051f361c9f6c9fb1576f6"}
+{
+    "name": "Jan",
+    "surname": "Fiala",
+    "email": "test@seznam.cz",
+    "role": "teamMember",
+    "id": "1ca17ce9b9c051f361c9f6c9fb1576f6"
+}

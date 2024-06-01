@@ -3,10 +3,8 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import CloseButton from "react-bootstrap/CloseButton";
 import Alert from "react-bootstrap/Alert";
-
 import { ProjectContext } from "./ProjectContext.js";
 import { UserContext } from "./UserContext.js";
-
 import Icon from "@mdi/react";
 import { mdiLoading } from "@mdi/js";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +29,7 @@ function ConfirmDeleteDialogProject({ setShowConfirmDeleteDialog, project }) {
           dismissible
           onClose={() => setShowAlert(null)}
         >
-          <Alert.Heading>Nepodařilo se vytvořit project</Alert.Heading>
+          <Alert.Heading>Failed to create project</Alert.Heading>
           <pre>{showAlert}</pre>
         </Alert>
         {isPending ? (
@@ -39,7 +37,7 @@ function ConfirmDeleteDialogProject({ setShowConfirmDeleteDialog, project }) {
             <Icon path={mdiLoading} size={2} spin />
           </div>
         ) : null}
-        Opravdu chcete smazat project: {project.name}?
+        Do you really want to delete the project: {project.name}?
       </Modal.Body>
       <Modal.Footer>
         <Button

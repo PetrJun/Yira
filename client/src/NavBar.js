@@ -1,13 +1,10 @@
 import { useNavigate } from "react-router-dom";
-
 import { useContext } from "react";
 import { UserContext } from "./UserContext";
-
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
-
 import Icon from "@mdi/react";
 import { mdiSitemapOutline, mdiLogout } from "@mdi/js";
 import Button from "react-bootstrap/esm/Button";
@@ -29,7 +26,7 @@ function NavBar() {
           <NavDropdown
             title={
               <span style={{color:"white"}}>
-                {loggedInUser ? loggedInUser.name : "Přihlaš se"}
+                {loggedInUser ? loggedInUser.name : "Login"}
               </span>
             }
             drop={"start"}
@@ -71,7 +68,7 @@ function getUserMenuList({ userList, loggedInUser, handlerMap }) {
         onClick={() => handlerMap.logout()}
         style={{ color: "red" }}
       >
-        <Icon path={mdiLogout} size={0.8} color={"red"} /> {"Odhlas se"}
+        <Icon path={mdiLogout} size={0.8} color={"red"} /> {"Logout"}
       </NavDropdown.Item>
     );
   }

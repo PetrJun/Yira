@@ -1,19 +1,14 @@
 import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import { TasksAndProjectsOnUserContext } from "./TasksAndProjectsOnUserContext.js";
 import { UserContext } from "./UserContext.js";
 import { TaskContext } from "./TaskContext.js";
 import { ProjectContext } from "./ProjectContext.js";
-
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
-
-// import EventCard from "./EventCard";
 import TaskForm from "./TaskForm.js";
 import ProjectForm from "./ProjectForm.js";
 import Container from "react-bootstrap/esm/Container.js";
-
 import Icon from "@mdi/react";
-import { mdiPlusBoxOutline } from "@mdi/js";
+import { mdiPlusBoxOutline, mdiSitemapOutline } from "@mdi/js";
 import { DataGridPro } from "@mui/x-data-grid-pro";
 import { format } from "date-fns";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
@@ -21,7 +16,6 @@ import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
 
 function Dashboard() {
-    // const { tasksAndProjectsOnUser } = useContext(TasksAndProjectsOnUserContext);
     const { loggedInUser } = useContext(UserContext);
     const { handlerMapTask } = useContext(TaskContext);
     const { handlerMapProject } = useContext(ProjectContext);
@@ -81,7 +75,6 @@ function Dashboard() {
 
     const handleKeyDown = (event) => {
         if (event.key === "Shift") {
-            console.log("Shift pressed: " + shiftPressed);
             setShiftPressed(true);
             const currentTime = new Date().getTime();
             if (lastShiftPressTime && currentTime - lastShiftPressTime < 2000) {
@@ -89,7 +82,6 @@ function Dashboard() {
             }
             setLastShiftPressTime(currentTime);
         } else if (event.key === "Control" && canCreateProject) {
-            console.log("Control pressed: " + ctrlPressed);
             setCtrlPressed(true);
             const currentTime = new Date().getTime();
             if (lastCtrlPressTime && currentTime - lastCtrlPressTime < 2000) {
@@ -137,7 +129,6 @@ function Dashboard() {
                     return response.json();
                 })
                 .then((data) => {
-                    console.log(data);
                     data = data.map((item) => {
                         if (item.projectId) {
                             return {
@@ -151,13 +142,11 @@ function Dashboard() {
                             };
                         }
                     });
-                    console.log(data);
                     data = modifyHierarchy(data);
-                    console.log(data);
                     setRows(data);
                     setLoading(false);
                 })
-                .catch((error) => console.log(error));
+                .catch((e) => console.log(e));
         }
         setAssigneeUserTaskChanged(false);
         setAssigneeUserProjectChanged(false);
@@ -185,7 +174,7 @@ function Dashboard() {
         {
             field: "projectName",
             headerName: "Project name",
-            width: 150,
+            width: 200,
             renderCell: (params) => {
                 if (params.row.projectName) {
                     return (
@@ -204,9 +193,10 @@ function Dashboard() {
             },
         },
         {
-            field: "assigneeUserObject",
+            field: "assigneeUserNameObject",
             headerName: "Assignee user",
             width: 200,
+            valueGetter: (params) => params.name ,
             renderCell: (params) =>
                 !params.row.projectId &&
                 loggedInUser?.id === params.row.assigneeUserNameObject.id &&
@@ -220,23 +210,27 @@ function Dashboard() {
                         title={params.row.assigneeUserNameObject.name}
                         style={{
                             position: "absolute",
-                            marginTop: "5px"
+                            marginTop: "5px",
                         }}
                     >
-                        {params.row.canBeAssignedUsersObjects.map((user) => (
-                            <Dropdown.Item
-                                eventKey={user.id}
-                                onClick={() =>
-                                    handleUpdateProject(
-                                        params.row.id,
-                                        user.id,
-                                        loggedInUser.id
-                                    )
-                                }
-                            >
-                                {user.name}
-                            </Dropdown.Item>
-                        ))}
+                        {params.row.canBeAssignedUsersObjects.map((user) => {
+                            if (user.name === params.row.assigneeUserNameObject.name) {
+                                return null;
+                            } else {
+                                return <Dropdown.Item
+                                    eventKey={user.id}
+                                    onClick={() =>
+                                        handleUpdateProject(
+                                            params.row.id,
+                                            user.id,
+                                            loggedInUser.id
+                                        )
+                                    }
+                                >
+                                    {user.name}
+                                </Dropdown.Item>
+                            }
+                        })}
                     </DropdownButton>
                 ) : !params.row.projectId &&
                   loggedInUser?.id !== params.row.assigneeUserNameObject.id &&
@@ -250,23 +244,27 @@ function Dashboard() {
                         title={params.row.assigneeUserNameObject.name}
                         style={{
                             position: "absolute",
-                            marginTop: "5px"
+                            marginTop: "5px",
                         }}
                     >
-                        {params.row.canBeAssignedUsersObjects.map((user) => (
-                            <Dropdown.Item
-                                eventKey={user.id}
-                                onClick={() =>
-                                    handleUpdateProject(
-                                        params.row.id,
-                                        user.id,
-                                        loggedInUser.id
-                                    )
-                                }
-                            >
-                                {user.name}
-                            </Dropdown.Item>
-                        ))}
+                        {params.row.canBeAssignedUsersObjects.map((user) => {
+                            if (user.name === params.row.assigneeUserNameObject.name) {
+                                return null;
+                            } else {
+                                return <Dropdown.Item
+                                    eventKey={user.id}
+                                    onClick={() =>
+                                        handleUpdateProject(
+                                            params.row.id,
+                                            user.id,
+                                            loggedInUser.id
+                                        )
+                                    }
+                                >
+                                    {user.name}
+                                </Dropdown.Item>
+                            }
+                        })}
                     </DropdownButton>
                 ) : !params.row.projectId &&
                   loggedInUser?.id === params.row.assigneeUserNameObject.id ? (
@@ -274,7 +272,7 @@ function Dashboard() {
                         style={{
                             backgroundColor: "yellow",
                             padding: "5px 5px 5px 5px",
-                            marginTop: "5px"
+                            marginTop: "5px",
                         }}
                     >
                         {params.row.assigneeUserNameObject.name}
@@ -293,23 +291,27 @@ function Dashboard() {
                         title={params.row.assigneeUserNameObject.name}
                         style={{
                             position: "absolute",
-                            marginTop: "5px"
+                            marginTop: "5px",
                         }}
                     >
-                        {params.row.canBeAssignedUsersObjects.map((user) => (
-                            <Dropdown.Item
-                                eventKey={user.id}
-                                onClick={() =>
-                                    handleUpdateTask(
-                                        params.row.id,
-                                        user.id,
-                                        loggedInUser.id
-                                    )
-                                }
-                            >
-                                {user.name}
-                            </Dropdown.Item>
-                        ))}
+                        {params.row.canBeAssignedUsersObjects.map((user) => {
+                            if (user.name === params.row.assigneeUserNameObject.name) {
+                                return null;
+                            } else {
+                                return <Dropdown.Item
+                                    eventKey={user.id}
+                                    onClick={() =>
+                                        handleUpdateTask(
+                                            params.row.id,
+                                            user.id,
+                                            loggedInUser.id
+                                        )
+                                    }
+                                >
+                                    {user.name}
+                                </Dropdown.Item>;
+                            }
+                        })}
                     </DropdownButton>
                 ) : (
                     <DropdownButton
@@ -321,30 +323,34 @@ function Dashboard() {
                         title={params.row.assigneeUserNameObject.name}
                         style={{
                             position: "absolute",
-                            marginTop: "5px"
+                            marginTop: "5px",
                         }}
                     >
-                        {params.row.canBeAssignedUsersObjects.map((user) => (
-                            <Dropdown.Item
-                                eventKey={user.id}
-                                onClick={() =>
-                                    handleUpdateTask(
-                                        params.row.id,
-                                        user.id,
-                                        loggedInUser.id
-                                    )
-                                }
-                            >
-                                {user.name}
-                            </Dropdown.Item>
-                        ))}
+                        {params.row.canBeAssignedUsersObjects.map((user) => {
+                            if (user.name === params.row.assigneeUserNameObject.name) {
+                                return null;
+                            } else {
+                                return <Dropdown.Item
+                                    eventKey={user.id}
+                                    onClick={() =>
+                                        handleUpdateTask(
+                                            params.row.id,
+                                            user.id,
+                                            loggedInUser.id
+                                        )
+                                    }
+                                >
+                                    {user.name}
+                                </Dropdown.Item>;
+                            }
+                        })}
                     </DropdownButton>
                 ),
         },
         {
             field: "deadline",
             headerName: "Deadline",
-            width: 180,
+            width: 200,
             valueFormatter: (params) => {
                 return format(new Date(params), "dd.MM. yyyy");
             },
@@ -352,10 +358,13 @@ function Dashboard() {
         {
             field: "state",
             headerName: "State",
-            width: 180,
+            width: 200,
             renderCell: (params) => (
                 <span
-                    style={{ backgroundColor: getColorForState(params.value) }}
+                    style={{
+                        backgroundColor: getColorForState(params.value),
+                        padding: "5px 5px 5px 5px",
+                    }}
                 >
                     {params.value}
                 </span>
@@ -364,7 +373,7 @@ function Dashboard() {
         {
             field: "action",
             headerName: "Action",
-            width: 150,
+            width: 200,
             renderCell: (params) => (
                 <Button
                     variant="success"
@@ -385,6 +394,11 @@ function Dashboard() {
     ];
 
     const getTreeDataPath = (row) => row.hierarchy;
+
+    const groupingColDef = {
+        headerName: <Icon path={mdiSitemapOutline} size={1} color={"blue"} />,
+        width: 20
+    };
 
     return loggedInUser ? (
         <Container>
@@ -458,6 +472,7 @@ function Dashboard() {
                             pagination: { paginationModel: { pageSize: 12 } },
                         }}
                         getTreeDataPath={getTreeDataPath}
+                        groupingColDef={groupingColDef}
                     />
                 </div>
             )}

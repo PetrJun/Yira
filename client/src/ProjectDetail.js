@@ -18,7 +18,6 @@ function ProjectDetail() {
     const { handlerMapProject } = useContext(ProjectContext);
     const location = useLocation();
     const navigate = useNavigate();
-
     const [projectInfo, setProjectInfo] = useState({});
     const [taskList, setTaskList] = useState([]);
     const [showProjectForm, setShowProjectForm] = useState(false);
@@ -26,7 +25,6 @@ function ProjectDetail() {
     const [showTaskForm, setShowTaskForm] = useState(false);
     const [assigneeUsers, setAssigneeUsers] = useState([]);
     const [assigneeUserChanged, setAssigneeUserChanged] = useState(false);
-
     const projectId = new URLSearchParams(location.search).get("id");
 
     const handleUpdate = async (projectId, assigneeUserId, userId) => {
@@ -39,32 +37,34 @@ function ProjectDetail() {
     };
 
     useEffect(() => {
-        fetch(`http://localhost:8000/api/project/get/${projectId}`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then((data) => {
-                setProjectInfo(data);
-            })
-            .catch((error) => console.log(error));
+        if (loggedInUser?.id) {
+            fetch(`http://localhost:8000/api/project/get/${projectId}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    setProjectInfo(data);
+                })
+                .catch((error) => console.log(error));
 
-        fetch(`http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then((data) => {
-                setTaskList(data.filter((task) => task.projectId === projectId));
-                setAssigneeUsers(data.filter((project) => project.id === projectId)[0].canBeAssignedUsersObjects);
-            })
-            .catch((error) => console.log(error));
+            fetch(`http://localhost:8000/api/project/getTasksAndProjectsOnUser/${loggedInUser.id}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    setTaskList(data.filter((task) => task.projectId === projectId));
+                    setAssigneeUsers(data.filter((project) => project.id === projectId)[0].canBeAssignedUsersObjects);
+                })
+                .catch((error) => console.log(error));
             setAssigneeUserChanged(false);
-    }, [projectId, loggedInUser.id, showProjectForm, showTaskForm, assigneeUserChanged]);
+        }
+    }, [projectId, loggedInUser, showProjectForm, showTaskForm, assigneeUserChanged]);
 
     const getUserNameById = (id) => {
         const user = userList.find(user => user.id === id);
@@ -72,7 +72,7 @@ function ProjectDetail() {
     };
 
     return (
-        <Container>
+        loggedInUser?.id && projectInfo?.userList?.includes(loggedInUser.id) ? (<Container>
             <Card className="mb-3">
                 {projectInfo && userList && 
                 <>
@@ -89,7 +89,7 @@ function ProjectDetail() {
                             title={getUserNameById(projectInfo.assigneeUser)}
                         >
                             {assigneeUsers?.map((user) => (
-                                <Dropdown.Item eventKey={user.id} onClick={() => handleUpdate(projectInfo.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
+                                <Dropdown.Item key={user.id} eventKey={user.id} onClick={() => handleUpdate(projectInfo.id, user.id, loggedInUser.id)}>{user.name}</Dropdown.Item>
                             ))}
                         </DropdownButton> : getUserNameById(projectInfo.assigneeUser)}<br />
                         <strong>State:</strong> {projectInfo.state}<br />
@@ -176,11 +176,11 @@ function ProjectDetail() {
                         <tr key={task.id}>
                             <td>{task.name}</td>
                             <td>{getUserNameById(task.createdBy)}</td>
-                            <td style={{backgroundColor: (task.assigneeUser === loggedInUser.id) ? 'yellow' : null}}>{task.assigneeUserNameObject.name}</td>
+                            <td style={{backgroundColor: (task.assigneeUser === loggedInUser.id) ? 'yellow' : null}}>{task.assigneeUserNameObject ? task.assigneeUserNameObject.name : 'Unknown'}</td>
                             <td>{task.state}</td>
                             <td>{new Date(task.deadline).toLocaleDateString()}</td>
                             <td>{task.estimate}</td>
-                            <td>{task.worked}</td>
+                            <td>{task.worked ? task.worked : 0}</td>
                             <td>{task.description}</td>
                             <td>{new Date(task.createdAt).toLocaleDateString()}</td>
                             <td>
@@ -198,8 +198,23 @@ function ProjectDetail() {
                 </Table>
                 </Card.Body>
             </Card>
-        </Container>
+        </Container>) : (
+            <div style={messageStyle}>Nothing here :/ please login</div>
+        )
     );
 }
+
+const messageStyle = {
+    color: "red",
+    fontSize: "3em",
+    fontWeight: "bold",
+    textAlign: "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "80vh",
+    margin: "0",
+    backgroundColor: "#f0f0f0",
+};
 
 export default ProjectDetail;

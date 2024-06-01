@@ -1,6 +1,5 @@
 import { useContext, useState, useEffect } from "react";
 import { TaskContext } from "./TaskContext.js";
-
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import CloseButton from "react-bootstrap/CloseButton";
@@ -8,7 +7,6 @@ import Form from "react-bootstrap/Form";
 import Alert from "react-bootstrap/Alert";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-
 import Icon from "@mdi/react";
 import { mdiLoading } from "@mdi/js";
 import { UserContext } from "./UserContext.js";
@@ -17,14 +15,11 @@ function TaskForm({ setShowTaskForm, task }) {
     const { loggedInUser } = useContext(UserContext);
     const { state, handlerMapTask } = useContext(TaskContext);
     const [showAlert, setShowAlert] = useState(null);
-
-    const [selectedProject, setSelectedProject] = useState(task.projectId || "");
+    const [selectedProject, setSelectedProject] = useState(task?.projectId || "");
     const [availableProjects, setAvailableProjects] = useState([]);
-    const [selectedAssigneeUser, setSelectedAssigneeUser] = useState(task.assigneeUser || "");
+    const [selectedAssigneeUser, setSelectedAssigneeUser] = useState(task?.assigneeUser || "");
     const [availableAssigneeUsers, setAvailableAssigneeUsers] = useState([]);
-
-    const [selectedState, setSelectedState] = useState(task.state || "");
-
+    const [selectedState, setSelectedState] = useState(task?.state || "");
     const isPending = state === "pending";
 
     // Fetch projects and assignee users on mount
@@ -106,7 +101,7 @@ function TaskForm({ setShowTaskForm, task }) {
                         onClose={() => setShowAlert(null)}
                     >
                         <Alert.Heading>
-                            Nepodařilo se vytvořit task
+                            Failed to create a task
                         </Alert.Heading>
                         <pre>{showAlert}</pre>
                     </Alert>
@@ -274,14 +269,14 @@ function TaskForm({ setShowTaskForm, task }) {
                         onClick={() => setShowTaskForm(false)}
                         disabled={isPending}
                     >
-                        Zavřít
+                        Close
                     </Button>
                     <Button
                         type="submit"
                         variant="primary"
                         disabled={isPending}
                     >
-                        {task.id ? "Upravit" : "Vytvořit"}
+                        {task.id ? "Edit" : "Create"}
                     </Button>
                 </Modal.Footer>
             </Form>

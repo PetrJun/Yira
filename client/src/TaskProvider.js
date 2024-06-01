@@ -8,29 +8,6 @@ function TaskProvider({ children }) {
         data: null,
     });
 
-    //   useEffect(() => {
-    //     handleLoad();
-    //   }, []);
-
-    //   async function handleLoad() {
-    //     setEventLoadObject((current) => ({ ...current, state: "pending" }));
-    //     const response = await fetch(`http://localhost:8000/event/list`, {
-    //       method: "GET",
-    //     });
-    //     const responseJson = await response.json();
-    //     if (response.status < 400) {
-    //       setEventLoadObject({ state: "ready", data: responseJson });
-    //       return responseJson;
-    //     } else {
-    //       setEventLoadObject((current) => ({
-    //         state: "error",
-    //         data: current.data,
-    //         error: responseJson.error,
-    //       }));
-    //       throw new Error(JSON.stringify(responseJson, null, 2));
-    //     }
-    //   }
-
     async function handleCreate(dtoIn) {
         setTaskObject((current) => ({ ...current, state: "pending" }));
         const response = await fetch(`http://localhost:8000/api/task/create`, {
