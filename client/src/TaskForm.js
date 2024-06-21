@@ -72,7 +72,9 @@ function TaskForm({ setShowTaskForm, task }) {
                         formData.worked = formData.worked ? parseInt(formData.worked) : 0;
                         formData.projectId = selectedProject;
                         formData.assigneeUser = selectedAssigneeUser;
-                        formData.state = selectedState;
+                        if (selectedState) {
+                            formData.state = selectedState;
+                        }
                         if (task.id) {
                             await handlerMapTask.handleUpdate(formData, task.id, loggedInUser.id);
                         } else {
@@ -257,6 +259,7 @@ function TaskForm({ setShowTaskForm, task }) {
                                 type="textarea"
                                 name="description"
                                 style={{ height: "100px" }}
+                                maxLength={500}
                                 // required
                                 defaultValue={task.description}
                             />

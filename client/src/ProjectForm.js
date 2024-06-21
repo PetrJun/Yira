@@ -56,7 +56,9 @@ function ProjectForm({ setShowProjectForm, project }) {
                             : 0;
                         formData.assigneeUser = selectedAssigneeUser;
                         formData.userList = users;
-                        formData.state = selectedState;
+                        if (selectedState) {
+                            formData.state = selectedState;
+                        }
                         if (project.id) {
                             await handlerMapProject.handleUpdate(formData, project.id, loggedInUser.id);
                         } else {
@@ -289,6 +291,7 @@ function ProjectForm({ setShowProjectForm, project }) {
                                 type="textarea"
                                 name="description"
                                 style={{ height: "100px" }}
+                                maxLength={500}
                                 // required
                                 defaultValue={project.description}
                             />

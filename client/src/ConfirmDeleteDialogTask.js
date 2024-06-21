@@ -29,7 +29,7 @@ function ConfirmDeleteDialogTask({ setShowConfirmDeleteDialog, task }) {
           dismissible
           onClose={() => setShowAlert(null)}
         >
-          <Alert.Heading>Failed to create task</Alert.Heading>
+          <Alert.Heading>Failed to delete task</Alert.Heading>
           <pre>{showAlert}</pre>
         </Alert>
         {isPending ? (
