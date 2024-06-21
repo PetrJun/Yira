@@ -150,7 +150,7 @@ function Dashboard() {
         }
         setAssigneeUserTaskChanged(false);
         setAssigneeUserProjectChanged(false);
-    }, [loggedInUser, assigneeUserTaskChanged, assigneeUserProjectChanged]);
+    }, [loggedInUser, assigneeUserTaskChanged, assigneeUserProjectChanged, showProjectForm, showTaskForm]);
 
     const getColorForState = (state) => {
         switch (state) {
@@ -170,11 +170,11 @@ function Dashboard() {
     };
 
     const columns = [
-        { field: "name", headerName: "Name", width: 200 },
+        { field: "name", headerName: "Name", width: 350 },
         {
             field: "projectName",
             headerName: "Project name",
-            width: 200,
+            width: 350,
             renderCell: (params) => {
                 if (params.row.projectName) {
                     return (
@@ -195,7 +195,7 @@ function Dashboard() {
         {
             field: "assigneeUserNameObject",
             headerName: "Assignee user",
-            width: 200,
+            width: 170,
             valueGetter: (params) => params.name ,
             renderCell: (params) =>
                 !params.row.projectId &&
@@ -350,7 +350,7 @@ function Dashboard() {
         {
             field: "deadline",
             headerName: "Deadline",
-            width: 200,
+            width: 100,
             valueFormatter: (params) => {
                 return format(new Date(params), "dd.MM. yyyy");
             },
@@ -358,7 +358,7 @@ function Dashboard() {
         {
             field: "state",
             headerName: "State",
-            width: 200,
+            width: 130,
             renderCell: (params) => (
                 <span
                     style={{

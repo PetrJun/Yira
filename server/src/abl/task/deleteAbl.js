@@ -24,7 +24,8 @@ async function DeleteAbl(req, res) {
 
         // check createdBy and assigneeUser
         if (userId === deletedTask.assigneeUser) {
-            res.json(task);
+            res.json({});
+            return;
         }
 
         // send email notification to assignee user
