@@ -20,6 +20,9 @@ function TaskForm({ setShowTaskForm, task }) {
     const [selectedAssigneeUser, setSelectedAssigneeUser] = useState(task?.assigneeUser || "");
     const [availableAssigneeUsers, setAvailableAssigneeUsers] = useState([]);
     const [selectedState, setSelectedState] = useState(task?.state || "");
+    const [selectedType, setSelectedType] = useState(task?.type || "BUG");
+    const [selectedSeverity, setSelectedSeverity] = useState(task?.severity || "MEDIUM");
+    const [selectedPriority, setSelectedPriority] = useState(task?.priority || "MEDIUM");
     const isPending = state === "pending";
 
     // Fetch projects and assignee users on mount
@@ -75,6 +78,9 @@ function TaskForm({ setShowTaskForm, task }) {
                         if (selectedState) {
                             formData.state = selectedState;
                         }
+                        formData.type = selectedType;
+                        formData.severity = selectedSeverity;
+                        formData.priority = selectedPriority;
                         if (task.id) {
                             await handlerMapTask.handleUpdate(formData, task.id, loggedInUser.id);
                         } else {
@@ -196,26 +202,12 @@ function TaskForm({ setShowTaskForm, task }) {
                             <Form.Label>State</Form.Label>
                             <Form.Select
                                 value={selectedState}
-                                onChange={(e) => {
-                                    setSelectedState(e.target.value);
-                                }}
+                                onChange={(e) => setSelectedState(e.target.value)}
                             >
                                 <option value="">Select state</option>
-                                <option key={1} value={"TODO"}>
-                                    TODO
-                                </option>
-                                <option key={2} value={"INPROGRESS"}>
-                                    INPROGRESS
-                                </option>
-                                <option key={3} value={"DONE"}>
-                                    DONE
-                                </option>
-                                <option key={4} value={"CANCELLED"}>
-                                    CANCELLED
-                                </option>
-                                <option key={5} value={"REVIEW"}>
-                                    REVIEW
-                                </option>
+                                {getAllowedStates(task?.state).map((s) => (
+                                    <option key={s} value={s}>{s}</option>
+                                ))}
                             </Form.Select>
                         </Form.Group>
                     </Row>
@@ -245,6 +237,35 @@ function TaskForm({ setShowTaskForm, task }) {
                                 // required
                                 defaultValue={parseInt(task.worked)}
                             />
+                        </Form.Group>
+                    </Row>
+                    <Row className="mb-3">
+                        <Form.Group as={Col} className="mb-3">
+                            <Form.Label>Type</Form.Label>
+                            <Form.Select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
+                                <option value="BUG">BUG</option>
+                                <option value="FEATURE">FEATURE</option>
+                                <option value="IMPROVEMENT">IMPROVEMENT</option>
+                                <option value="TASK">TASK</option>
+                            </Form.Select>
+                        </Form.Group>
+                        <Form.Group as={Col} className="mb-3">
+                            <Form.Label>Severity</Form.Label>
+                            <Form.Select value={selectedSeverity} onChange={(e) => setSelectedSeverity(e.target.value)}>
+                                <option value="LOW">LOW</option>
+                                <option value="MEDIUM">MEDIUM</option>
+                                <option value="HIGH">HIGH</option>
+                                <option value="CRITICAL">CRITICAL</option>
+                            </Form.Select>
+                        </Form.Group>
+                        <Form.Group as={Col} className="mb-3">
+                            <Form.Label>Priority</Form.Label>
+                            <Form.Select value={selectedPriority} onChange={(e) => setSelectedPriority(e.target.value)}>
+                                <option value="LOW">LOW</option>
+                                <option value="MEDIUM">MEDIUM</option>
+                                <option value="HIGH">HIGH</option>
+                                <option value="URGENT">URGENT</option>
+                            </Form.Select>
                         </Form.Group>
                     </Row>
                     <Row className="mb-3">
@@ -300,6 +321,21 @@ function pendingStyle() {
         backgroundColor: "white",
         opacity: "0.5",
     };
+}
+
+const stateTransitions = {
+    TODO:       ["INPROGRESS", "CANCELLED"],
+    INPROGRESS: ["REVIEW", "TODO", "CANCELLED"],
+    REVIEW:     ["DONE", "INPROGRESS"],
+    DONE:       ["INPROGRESS"],
+    CANCELLED:  ["TODO"],
+};
+
+const allStates = ["TODO", "INPROGRESS", "DONE", "CANCELLED", "REVIEW"];
+
+function getAllowedStates(currentState) {
+    if (!currentState) return allStates;
+    return [currentState, ...(stateTransitions[currentState] || [])];
 }
 
 const eventDateToInput = (dateString) => {

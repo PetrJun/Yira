@@ -7,6 +7,7 @@ import TaskProvider from "./TaskProvider";
 import ProjectProvider from "./ProjectProvider";
 import ProjectDetail from "./ProjectDetail";
 import TaskDetail from "./TaskDetail";
+import Report from "./Report";
 
 function App() {
     return (
@@ -25,6 +26,10 @@ function App() {
                                     <Route
                                         path="task"
                                         element={<TaskDetail />}
+                                    />
+                                    <Route
+                                        path="report"
+                                        element={<Report />}
                                     />
                                     <Route path="*" element={"not found"} />
                                 </Route>

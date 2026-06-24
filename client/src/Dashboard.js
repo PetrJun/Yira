@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "./UserContext.js";
 import { TaskContext } from "./TaskContext.js";
 import { ProjectContext } from "./ProjectContext.js";
-import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Button, OverlayTrigger, Tooltip, Form, Row, Col } from "react-bootstrap";
 import TaskForm from "./TaskForm.js";
 import ProjectForm from "./ProjectForm.js";
 import Container from "react-bootstrap/esm/Container.js";
@@ -35,6 +35,9 @@ function Dashboard() {
         useState(false);
     const [assigneeUserProjectChanged, setAssigneeUserProjectChanged] =
         useState(false);
+    const [filterType, setFilterType] = useState("");
+    const [filterSeverity, setFilterSeverity] = useState("");
+    const [filterPriority, setFilterPriority] = useState("");
 
     const handleUpdateTask = async (taskId, assigneeUserId, userId) => {
         try {
@@ -151,6 +154,26 @@ function Dashboard() {
         setAssigneeUserTaskChanged(false);
         setAssigneeUserProjectChanged(false);
     }, [loggedInUser, assigneeUserTaskChanged, assigneeUserProjectChanged, showProjectForm, showTaskForm]);
+
+    const getColorForSeverity = (severity) => {
+        switch (severity) {
+            case "CRITICAL": return "#FF5733";
+            case "HIGH":     return "orange";
+            case "MEDIUM":   return "lightyellow";
+            case "LOW":      return "lightgreen";
+            default:         return "white";
+        }
+    };
+
+    const getColorForPriority = (priority) => {
+        switch (priority) {
+            case "URGENT": return "#FF5733";
+            case "HIGH":   return "orange";
+            case "MEDIUM": return "lightyellow";
+            case "LOW":    return "lightgreen";
+            default:       return "white";
+        }
+    };
 
     const getColorForState = (state) => {
         switch (state) {
@@ -371,6 +394,34 @@ function Dashboard() {
             ),
         },
         {
+            field: "type",
+            headerName: "Type",
+            width: 110,
+            renderCell: (params) => params.value ? (
+                <span style={{ padding: "5px" }}>{params.value}</span>
+            ) : null,
+        },
+        {
+            field: "severity",
+            headerName: "Severity",
+            width: 110,
+            renderCell: (params) => params.value ? (
+                <span style={{ backgroundColor: getColorForSeverity(params.value), padding: "5px" }}>
+                    {params.value}
+                </span>
+            ) : null,
+        },
+        {
+            field: "priority",
+            headerName: "Priority",
+            width: 110,
+            renderCell: (params) => params.value ? (
+                <span style={{ backgroundColor: getColorForPriority(params.value), padding: "5px" }}>
+                    {params.value}
+                </span>
+            ) : null,
+        },
+        {
             field: "action",
             headerName: "Action",
             width: 200,
@@ -399,6 +450,13 @@ function Dashboard() {
         headerName: <Icon path={mdiSitemapOutline} size={1} color={"blue"} />,
         width: 20
     };
+
+    const filteredRows = rows.filter((row) => {
+        if (filterType && row.projectId && row.type !== filterType) return false;
+        if (filterSeverity && row.projectId && row.severity !== filterSeverity) return false;
+        if (filterPriority && row.projectId && row.priority !== filterPriority) return false;
+        return true;
+    });
 
     return loggedInUser ? (
         <Container>
@@ -450,6 +508,35 @@ function Dashboard() {
                     setShowProjectForm={setShowProjectForm}
                 />
             ) : null}
+            <Row className="mt-2 mb-1 align-items-end" style={{ gap: "4px" }}>
+                <Col xs="auto">
+                    <Form.Select size="sm" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+                        <option value="">Všechny typy</option>
+                        <option value="BUG">BUG</option>
+                        <option value="FEATURE">FEATURE</option>
+                        <option value="IMPROVEMENT">IMPROVEMENT</option>
+                        <option value="TASK">TASK</option>
+                    </Form.Select>
+                </Col>
+                <Col xs="auto">
+                    <Form.Select size="sm" value={filterSeverity} onChange={(e) => setFilterSeverity(e.target.value)}>
+                        <option value="">Všechny severity</option>
+                        <option value="LOW">LOW</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                        <option value="CRITICAL">CRITICAL</option>
+                    </Form.Select>
+                </Col>
+                <Col xs="auto">
+                    <Form.Select size="sm" value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
+                        <option value="">Všechny priority</option>
+                        <option value="LOW">LOW</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                        <option value="URGENT">URGENT</option>
+                    </Form.Select>
+                </Col>
+            </Row>
             {rows.length > 0 && (
                 <div
                     style={{
@@ -463,7 +550,7 @@ function Dashboard() {
                 >
                     <DataGridPro
                         treeData
-                        rows={rows}
+                        rows={filteredRows}
                         columns={columns}
                         loading={loading}
                         getRowId={(row) => row.id} // Specify the unique field for row ID

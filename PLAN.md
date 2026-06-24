@@ -42,23 +42,23 @@ Všechny změny jsou aditivní — žádná existující data se nerozbijí.
 
 ### Client
 
-- [ ] **7. TaskForm.js** — přidat 3 nové `<Form.Select>` (Typ, Severity, Priority)
+- [x] **7. TaskForm.js** — přidat 3 nové `<Form.Select>` (Typ, Severity, Priority)
   - State dropdown omezit na povolené přechody při editaci (jen validní next states)
 
-- [ ] **8. TaskDetail.js** — zobrazit Typ, Severity, Priority jako read-only pole
+- [x] **8. TaskDetail.js** — zobrazit Typ, Severity, Priority jako read-only pole
 
-- [ ] **9. Dashboard.js** — nové sloupce + filtrovací panel
+- [x] **9. Dashboard.js** — nové sloupce + filtrovací panel
   - Sloupce: `type` (110px), `severity` (110px, barevná), `priority` (110px, barevná)
   - Severity/Priority barvy: CRITICAL/URGENT=`#FF5733`, HIGH=`orange`, MEDIUM=`lightyellow`, LOW=`lightgreen`
   - Filtrovací panel: 3 `<Form.Select>` nad gridem (Type / Severity / Priority + "Vše")
 
-- [ ] **10. Report.js** — nová stránka `client/src/Report.js`
+- [x] **10. Report.js** — nová stránka `client/src/Report.js`
   - Data z jednoho `fetch` na `getTasksAndProjectsOnUser`, agregace client-side
   - Tabulky/Cards: dle stavu, dle severity, dle priority, dle typu, dle projektu (top 5)
 
-- [ ] **11. App.js** — přidat route `/report` → `<Report />`
+- [x] **11. App.js** — přidat route `/report` → `<Report />`
 
-- [ ] **12. NavBar.js** — přidat odkaz "Report"
+- [x] **12. NavBar.js** — přidat odkaz "Report"
 
 ---
 

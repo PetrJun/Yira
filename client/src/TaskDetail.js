@@ -92,6 +92,9 @@ function TaskDetail() {
                             ))}
                         </DropdownButton><br />
                         <strong>State:</strong> {taskInfo.state}<br />
+                        <strong>Type:</strong> {taskInfo.type || "—"}<br />
+                        <strong>Severity:</strong> {taskInfo.severity || "—"}<br />
+                        <strong>Priority:</strong> {taskInfo.priority || "—"}<br />
                         <strong>Deadline:</strong> {new Date(taskInfo.deadline).toLocaleDateString()}<br />
                         <strong>Estimate:</strong> {taskInfo.estimate} hours<br />
                         <strong>Worked:</strong> {taskInfo.worked ? taskInfo.worked : 0} hours<br />

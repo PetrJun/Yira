@@ -22,6 +22,11 @@ function NavBar() {
             YIRA
           </Button>
         </Navbar.Brand>
+        <Nav className="me-auto">
+          <Nav.Link onClick={() => navigate("/report")} style={{ color: "white" }}>
+            Report
+          </Nav.Link>
+        </Nav>
         <Nav>
           <NavDropdown
             title={
