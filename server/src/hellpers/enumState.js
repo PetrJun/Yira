@@ -1,4 +1,3 @@
-// Enum of states
 const State = {
     TODO: "TODO",
     INPROGRESS: "INPROGRESS",
@@ -7,4 +6,25 @@ const State = {
     REVIEW: "REVIEW"
 };
 
-module.exports = { State };
+const Severity = {
+    LOW: "LOW",
+    MEDIUM: "MEDIUM",
+    HIGH: "HIGH",
+    CRITICAL: "CRITICAL"
+};
+
+const Priority = {
+    LOW: "LOW",
+    MEDIUM: "MEDIUM",
+    HIGH: "HIGH",
+    URGENT: "URGENT"
+};
+
+const Type = {
+    BUG: "BUG",
+    FEATURE: "FEATURE",
+    IMPROVEMENT: "IMPROVEMENT",
+    TASK: "TASK"
+};
+
+module.exports = { State, Severity, Priority, Type };

@@ -3,10 +3,11 @@ const ajv = new Ajv();
 
 const taskDAO = require("../../DAO/taskDAO.js");
 const userDao = require("../../DAO/userDAO.js");
-const { State } = require("../../hellpers/enumState.js");
+const { State, Severity, Priority, Type } = require("../../hellpers/enumState.js");
 const { validateDateTime } = require("../../hellpers/validateDatetime.js");
 const sendMail = require("../../hellpers/sendMail.js");
 const { userOnTask } = require("../../hellpers/taskFunctions.js");
+const { isValidTransition } = require("../../hellpers/stateTransitions.js");
 
 ajv.addFormat("date-time", { validate: validateDateTime });
 
@@ -17,6 +18,9 @@ const schema = {
         name: { type: "string" },
         assigneeUser: { type: "string", minLength: 32, maxLength: 32 },
         state: { type: "string", enum: Object.values(State) },
+        severity: { type: "string", enum: Object.values(Severity) },
+        priority: { type: "string", enum: Object.values(Priority) },
+        type: { type: "string", enum: Object.values(Type) },
         deadline: { type: "string", format: "date-time" },
         estimate: { type: "number" },
         worked: { type: "number", default: 0 },
@@ -45,6 +49,15 @@ async function UpdateAbl(req, res) {
         // add id to task
         task.id = taskId;
         oldTask = taskDAO.get(task.id);
+
+        // validate state transition
+        if (task.state && !isValidTransition(oldTask.state, task.state)) {
+            res.status(400).json({
+                code: "invalidStateTransition",
+                message: `Transition from ${oldTask.state} to ${task.state} is not allowed`,
+            });
+            return;
+        }
 
         // if userId is not in userList of project throw error
         const canUpdateTask = userOnTask(userId, oldTask.projectId);

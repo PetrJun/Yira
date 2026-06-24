@@ -3,7 +3,7 @@ const ajv = new Ajv();
 
 const taskDAO = require("../../DAO/taskDAO.js");
 const userDao = require("../../DAO/userDAO.js");
-const { State } = require("../../hellpers/enumState.js");
+const { State, Severity, Priority, Type } = require("../../hellpers/enumState.js");
 const { validateDateTime } = require("../../hellpers/validateDatetime.js");
 const { addFieldsToCreateTask, userOnTask, existsProjectId } = require("../../hellpers/taskFunctions.js");
 const sendMail = require("../../hellpers/sendMail.js");
@@ -18,6 +18,9 @@ const schema = {
         createdBy: { type: "string", minLength: 32, maxLength: 32 },
         assigneeUser: { type: "string", minLength: 32, maxLength: 32 },
         state: { type: "string", enum: Object.values(State) },
+        severity: { type: "string", enum: Object.values(Severity) },
+        priority: { type: "string", enum: Object.values(Priority) },
+        type: { type: "string", enum: Object.values(Type) },
         deadline: { type: "string", format: "date-time" },
         estimate: { type: "number" },
         worked: { type: "number", default: 0 },

@@ -1,4 +1,4 @@
-const { State } = require("./enumState");
+const { State, Severity, Priority, Type } = require("./enumState");
 const projectDao = require("../DAO/projectDAO.js");
 
 /**
@@ -16,6 +16,9 @@ function addFieldsToCreateTask(req) {
         "createdBy": req.createdBy,
         "assigneeUser": assigneeUser,
         "state": state,
+        "severity": req.severity || Severity.MEDIUM,
+        "priority": req.priority || Priority.MEDIUM,
+        "type": req.type || Type.BUG,
         "deadline": req.deadline,
         "estimate": req.estimate,
         "worked": req.worked,

@@ -4,7 +4,7 @@ const ajv = new Ajv();
 const projectDAO = require("../../DAO/projectDAO.js");
 const taskDAO = require("../../DAO/taskDAO.js");
 const userDAO = require("../../DAO/userDAO.js");
-const { State } = require("../../hellpers/enumState.js");
+const { State, Severity, Priority, Type } = require("../../hellpers/enumState.js");
 
 const schema = {
     type: "object",
@@ -12,6 +12,9 @@ const schema = {
         filterByState: { type: "string", enum: Object.values(State) },
         filterByName: { type: "string" },
         filterByAssigneeUser: { type: "string" },
+        filterByType: { type: "string", enum: Object.values(Type) },
+        filterBySeverity: { type: "string", enum: Object.values(Severity) },
+        filterByPriority: { type: "string", enum: Object.values(Priority) },
     },
     additionalProperties: false,
 };
@@ -116,6 +119,15 @@ async function GetTasksAndProjectsOnUserAbl(req, res) {
         }
         if (filterObject.filterByAssigneeUser) {
             tasksAndProjects = tasksAndProjects.filter((value) => value.assigneeUserNameObject.name.includes(filterObject.filterByAssigneeUser));
+        }
+        if (filterObject.filterByType) {
+            tasksAndProjects = tasksAndProjects.filter((value) => value.type === filterObject.filterByType);
+        }
+        if (filterObject.filterBySeverity) {
+            tasksAndProjects = tasksAndProjects.filter((value) => value.severity === filterObject.filterBySeverity);
+        }
+        if (filterObject.filterByPriority) {
+            tasksAndProjects = tasksAndProjects.filter((value) => value.priority === filterObject.filterByPriority);
         }
 
         res.json(tasksAndProjects);

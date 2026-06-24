@@ -12,12 +12,12 @@ Všechny změny jsou aditivní — žádná existující data se nerozbijí.
 
 ### Server
 
-- [ ] **1. enumState.js** — přidat `Severity`, `Priority`, `Type` vedle `State`
+- [x] **1. enumState.js** — přidat `Severity`, `Priority`, `Type` vedle `State`
   - `Severity`: LOW, MEDIUM, HIGH, CRITICAL
   - `Priority`: LOW, MEDIUM, HIGH, URGENT
   - `Type`: BUG, FEATURE, IMPROVEMENT, TASK
 
-- [ ] **2. stateTransitions.js** — nový soubor `server/src/hellpers/stateTransitions.js`
+- [x] **2. stateTransitions.js** — nový soubor `server/src/hellpers/stateTransitions.js`
   - Definovat povolené přechody pro bugfixing workflow:
     - TODO → INPROGRESS, CANCELLED
     - INPROGRESS → REVIEW, TODO, CANCELLED
@@ -26,17 +26,17 @@ Všechny změny jsou aditivní — žádná existující data se nerozbijí.
     - CANCELLED → TODO (znovuotevření)
   - Exportovat `isValidTransition(fromState, toState)` → boolean
 
-- [ ] **3. taskFunctions.js** — výchozí hodnoty pro nová pole v `addFieldsToCreateTask()`
+- [x] **3. taskFunctions.js** — výchozí hodnoty pro nová pole v `addFieldsToCreateTask()`
   - `severity = Severity.MEDIUM`
   - `priority = Priority.MEDIUM`
   - `type = Type.BUG`
 
-- [ ] **4. task/createAbl.js** — rozšířit ajv schema o `severity`, `priority`, `type`
+- [x] **4. task/createAbl.js** — rozšířit ajv schema o `severity`, `priority`, `type`
 
-- [ ] **5. task/updateAbl.js** — rozšířit ajv schema + přidat validaci stavového přechodu
+- [x] **5. task/updateAbl.js** — rozšířit ajv schema + přidat validaci stavového přechodu
   - `isValidTransition(oldTask.state, dtoIn.state)` → 400 `invalidStateTransition` při neplatném přechodu
 
-- [ ] **6. getTasksAndProjectsOnUser.js** — přidat `filterByType`, `filterBySeverity`, `filterByPriority` do schema a logiky filtrování
+- [x] **6. getTasksAndProjectsOnUser.js** — přidat `filterByType`, `filterBySeverity`, `filterByPriority` do schema a logiky filtrování
 
 ---
 
